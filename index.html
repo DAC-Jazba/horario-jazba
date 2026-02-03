@@ -14,7 +14,6 @@
         
         .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
         
-        /* Estilos para columna fija de Asesor */
         .sticky-col { 
             position: sticky; 
             left: 0; 
@@ -35,13 +34,11 @@
             100% { outline-color: #facc15; } 
         }
 
-        /* Resaltado de fila seleccionada */
         .row-selected { background-color: #fef9c3 !important; }
         .row-selected .sticky-col { background-color: #fef9c3 !important; }
 
-        /* Control de visibilidad para Admin */
-        .admin-view { display: none !important; }
-        .is-admin .admin-view { display: block !important; }
+        .admin-only { display: none !important; }
+        .is-admin .admin-only { display: block !important; }
         .is-admin .admin-flex { display: flex !important; }
 
         #toast {
@@ -80,27 +77,18 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <!-- Solo Admin ve Versiones -->
-                <div class="admin-view flex-col border-r border-slate-200 pr-3">
+                <div class="admin-only flex-col border-r border-slate-200 pr-3">
                     <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Versión Activa</label>
                     <div class="flex gap-2">
                         <select id="scheduleVersionSelector" onchange="switchSchedule()" class="bg-white border-slate-200 rounded-lg text-xs font-bold p-1.5 shadow-sm outline-none"></select>
-                        <button onclick="deleteCurrentVersion()" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar Versión Actual">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
+                        <button onclick="deleteCurrentVersion()" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar Versión"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
                 
-                <div class="admin-view flex gap-2">
-                    <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Gestionar Versiones">
-                        <i data-lucide="copy-plus" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm">
-                        <i data-lucide="users" class="w-4 h-4"></i> Personal
-                    </button>
-                    <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm">
-                        <i data-lucide="store" class="w-4 h-4"></i> Tienda
-                    </button>
+                <div class="admin-only flex gap-2">
+                    <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Gestionar Versiones"><i data-lucide="copy-plus" class="w-4 h-4"></i></button>
+                    <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="users" class="w-4 h-4"></i> Personal</button>
+                    <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="store" class="w-4 h-4"></i> Tienda</button>
                 </div>
 
                 <div class="flex flex-col pl-3 border-l border-slate-200">
@@ -115,7 +103,7 @@
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div class="flex items-center gap-3">
                     <div class="bg-blue-500 p-2 rounded-lg text-white shadow-inner"><i data-lucide="calendar" class="w-5 h-5"></i></div>
-                    <h2 class="text-lg font-bold text-slate-700 uppercase tracking-tight" id="viewTitle">Sincronizando con la nube...</h2>
+                    <h2 class="text-lg font-bold text-slate-700 uppercase tracking-tight" id="viewTitle">Sincronizando...</h2>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-black text-slate-400 uppercase">Ver Semana:</span>
@@ -137,7 +125,7 @@
         <div class="flex flex-col space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 uppercase tracking-tight">
-                    <i data-lucide="settings" class="text-amber-500"></i> Configuración del Ciclo Base
+                    <i data-lucide="settings" class="text-amber-500"></i> Ciclo Base de Tiendas
                 </h2>
                 <div class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
                     <button onclick="changeEditWeek(1)" id="btnW1" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 1</button>
@@ -156,15 +144,15 @@
                 <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="lock" class="text-blue-600 w-8 h-8"></i>
                 </div>
-                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Validando...</h3>
+                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Cargando...</h3>
                 <p class="text-slate-400 text-sm" id="authSubtitle">Seguridad DAC JAZBA</p>
             </div>
             <div class="space-y-4">
                 <input type="text" id="authUsername" placeholder="Usuario" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
                 <input type="password" id="authPassword" placeholder="Contraseña" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
-                <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Entrar</button>
+                <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Validar</button>
             </div>
-            <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
+            <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
         </div>
     </div>
 
@@ -177,12 +165,10 @@
             </div>
             <div class="p-8 space-y-4">
                 <input type="hidden" id="assignTarget">
-                
-                <div id="workerField" class="admin-view">
+                <div id="workerField" class="admin-only">
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Asesor</label>
-                    <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
+                    <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none"></select>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Estado</label>
@@ -198,19 +184,14 @@
                         <input type="number" id="breakMinutes" value="45" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
                     </div>
                 </div>
-
                 <div id="timeFields" class="grid grid-cols-2 gap-4">
                     <input type="time" id="startTime" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
                     <input type="time" id="endTime" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
                 </div>
-
                 <div class="flex items-center gap-3 bg-amber-50 p-4 rounded-xl border border-amber-100">
                     <input type="checkbox" id="isHighlighted" class="w-5 h-5 accent-amber-600 rounded cursor-pointer">
-                    <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide">
-                        <i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio
-                    </label>
+                    <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide"><i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio</label>
                 </div>
-
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="isTemporary" onchange="toggleTempUI()" class="w-4 h-4 accent-blue-600 rounded">
@@ -221,12 +202,9 @@
                         <input type="date" id="untilDate" class="w-full border-blue-200 rounded-lg p-2 font-bold text-xs">
                     </div>
                 </div>
-
                 <div class="pt-4 flex flex-col gap-3">
-                     <button onclick="saveAssignment()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-xs">Guardar Cambios</button>
-                     <button id="deleteAssignmentBtn" onclick="deleteAssignment()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold hover:bg-red-100 flex items-center justify-center gap-2 text-xs">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> ELIMINAR ASIGNACIÓN
-                     </button>
+                     <button onclick="saveAssignment()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-xs">Guardar</button>
+                     <button id="deleteAssignmentBtn" onclick="deleteAssignment()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold hover:bg-red-100 flex items-center justify-center gap-2 text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i> ELIMINAR</button>
                 </div>
             </div>
         </div>
@@ -235,8 +213,8 @@
     <!-- MODALES GESTIÓN -->
     <div id="versionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-4 text-center">
-            <h3 class="text-xl font-bold text-slate-800">Duplicar Horario</h3>
-            <input type="text" id="newVersionName" placeholder="Nombre (ej. Horario Mayo)" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
+            <h3 class="text-xl font-bold">Duplicar Horario</h3>
+            <input type="text" id="newVersionName" placeholder="Nombre (ej. Horario Mayo)" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
             <button onclick="createNewVersion()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-xs uppercase">Crear Copia</button>
             <button onclick="toggleModal('versionModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
         </div>
@@ -244,7 +222,7 @@
 
     <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
-             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Gestionar Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
+             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
              <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl border-2 border-slate-100"></div>
              <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir Asesor</button>
              <div id="workerList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
@@ -261,21 +239,13 @@
 
     <div id="toast">Notificación</div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CONFIGURACIÓN Y ESTADO ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyCrIx2vVDC46s2Ndj4nJRJcvBIpeBaYwr0",
-  authDomain: "horario-laboral-jazba.firebaseapp.com",
-  projectId: "horario-laboral-jazba",
-  storageBucket: "horario-laboral-jazba.firebasestorage.app",
-  messagingSenderId: "478270592308",
-  appId: "1:478270592308:web:cae54c438f25efe82c8161"
-};
+        // --- CONFIG Y ESTADO ---
+        const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -292,140 +262,23 @@
 
         const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-        // --- INICIALIZACIÓN SEGURA ---
-        window.addEventListener('load', async () => {
-            initWeekSelector();
-            
-            try {
-                // Prioridad a token personalizado si existe
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) {
-                console.error("Auth error:", e);
-                showToast("Error de conexión inicial.");
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('app').style.opacity = "1";
-                    // Solo iniciamos snapshots cuando el usuario está logueado
-                    startDataSync();
-                    checkAdminRegistration();
-                }
-            });
-        });
-
-        // --- FIRESTORE SYNC ---
-
-        async function checkAdminRegistration() {
-            if (!auth.currentUser) return;
-            // Usamos una ruta plana de colección para config según Regla 1
-            try {
-                const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
-                if (adminDoc.exists()) {
-                    adminAccount = adminDoc.data();
-                    document.getElementById('authTitle').innerText = "Iniciar Sesión";
-                    document.getElementById('authSubtitle').innerText = "Identifícate como administrador";
-                    document.getElementById('authSubmitBtn').innerText = "Entrar";
-                    // Limpiar campos para que no aparezcan escritos del registro
-                    document.getElementById('authUsername').value = "";
-                    document.getElementById('authPassword').value = "";
-                } else {
-                    document.getElementById('authTitle').innerText = "Registrar Admin";
-                    document.getElementById('authSubtitle').innerText = "Crea el usuario maestro para gestionar";
-                    document.getElementById('authSubmitBtn').innerText = "Registrar Maestro";
-                }
-            } catch (e) {
-                console.error("Config check error:", e);
-            }
-        }
-
-        function startDataSync() {
-            if (!auth.currentUser) return;
-
-            // Escuchar Horarios
-            const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
-            onSnapshot(schedulesCol, (snapshot) => {
-                if (snapshot.empty) {
-                    const initial = {
-                        name: "Horario Principal",
-                        workers: [{ id: 1, name: 'DANIEL', color: '#3b82f6' }],
-                        stores: [{ id: 1, name: 'Tienda 1', slots: { 'Apertura': 1, 'Cierre': 1 } }],
-                        assignments: [],
-                        overrides: []
-                    };
-                    saveScheduleToCloud("Horario Principal", initial);
-                } else {
-                    snapshot.forEach(doc => {
-                        schedules[doc.id] = doc.data();
-                    });
-                    updateVersionSelector();
-                    renderAll();
-                }
-            }, (err) => console.error("Snapshot error schedules:", err));
-
-            // Escuchar Fecha Global
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), (snap) => {
-                if (snap.exists() && snap.data().baseDate) {
-                    baseDate = new Date(snap.data().baseDate);
-                    document.getElementById('baseDate').valueAsDate = baseDate;
-                    renderAll();
-                }
-            }, (err) => console.error("Snapshot error globals:", err));
-        }
-
-        async function saveScheduleToCloud(name, data) {
-            if (!auth.currentUser) return;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data);
-            } catch (e) { showToast("Error al guardar cambios."); }
-        }
-
-        async function updateGlobalConfig(data) {
-            if (!auth.currentUser) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), data, { merge: true });
-        }
-
-        // --- SEGURIDAD ---
-
-        window.handleAuthAction = async () => {
-            const user = document.getElementById('authUsername').value.trim();
-            const pass = document.getElementById('authPassword').value.trim();
-
-            if (!user || !pass) return showToast("Faltan datos.");
-
-            if (!adminAccount) {
-                // Registro inicial de admin
-                try {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'), { user, pass });
-                    showToast("Administrador registrado.");
-                    adminAccount = { user, pass };
-                    executeLogin();
-                } catch (e) { showToast("Error al registrar."); }
-            } else {
-                // Login normal
-                if (user === adminAccount.user && pass === adminAccount.pass) {
-                    executeLogin();
-                } else {
-                    showToast("Usuario o clave incorrectos.");
-                }
-            }
+        // --- EXPORTAR FUNCIONES AL GLOBAL (Solución al ReferenceError) ---
+        
+        window.renderAll = () => {
+            const active = schedules[currentScheduleName];
+            if (!active) return;
+            populateWorkerSelects();
+            renderIndividualView();
+            renderStoreGrids();
+            renderWorkerList();
+            lucide.createIcons();
+            document.getElementById('viewTitle').innerText = `${currentScheduleName}`;
         };
 
-        function executeLogin() {
-            isAdmin = true;
-            document.body.classList.add('is-admin');
-            document.getElementById('adminBadge').innerText = "ADMINISTRADOR";
-            document.getElementById('adminBadge').classList.replace('bg-slate-100', 'bg-blue-600');
-            document.getElementById('adminBadge').classList.replace('text-slate-500', 'text-white');
-            document.getElementById('loginBtn').innerText = "Cerrar Panel";
-            toggleModal('authModal');
-            renderAll();
-            showToast("Acceso concedido.");
-        }
+        window.toggleModal = (id) => {
+            document.getElementById(id).classList.toggle('hidden');
+            if(id === 'workerModal') renderWorkerList();
+        };
 
         window.showLoginModal = () => {
             if (isAdmin) {
@@ -435,77 +288,63 @@
                 document.getElementById('adminBadge').classList.replace('bg-blue-600', 'bg-slate-100');
                 document.getElementById('adminBadge').classList.replace('text-white', 'text-slate-500');
                 document.getElementById('loginBtn').innerText = "Acceso Admin";
-                renderAll();
+                window.renderAll();
                 return;
             }
             toggleModal('authModal');
-        }
+        };
 
-        // --- UI UTILS ---
+        window.handleAuthAction = async () => {
+            const user = document.getElementById('authUsername').value.trim();
+            const pass = document.getElementById('authPassword').value.trim();
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
+            if (!user || !pass) return showToast("Faltan datos.");
 
-        window.toggleModal = (id) => {
-            document.getElementById(id).classList.toggle('hidden');
-            if(id === 'workerModal') renderWorkerList();
-        }
-
-        function initWeekSelector() {
-            const select = document.getElementById('weekSelectorView');
-            select.innerHTML = '';
-            for (let i = 1; i <= 12; i++) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.textContent = `Semana ${i}`;
-                select.appendChild(opt);
+            if (!adminAccount) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'), { user, pass });
+                    adminAccount = { user, pass };
+                    executeLogin();
+                } catch (e) { showToast("Error al registrar."); }
+            } else {
+                if (user === adminAccount.user && pass === adminAccount.pass) {
+                    executeLogin();
+                } else {
+                    showToast("Usuario o contraseña incorrectos.");
+                }
             }
-        }
-
-        function updateVersionSelector() {
-            const selector = document.getElementById('scheduleVersionSelector');
-            selector.innerHTML = '';
-            Object.keys(schedules).forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name; opt.textContent = name;
-                if (name === currentScheduleName) opt.selected = true;
-                selector.appendChild(opt);
-            });
-        }
+        };
 
         window.switchSchedule = () => {
             currentScheduleName = document.getElementById('scheduleVersionSelector').value;
-            renderAll();
-        }
+            window.renderAll();
+        };
 
         window.updateDates = async () => {
             if (!isAdmin) return;
-            const newDate = document.getElementById('baseDate').value + "T00:00:00";
-            baseDate = new Date(newDate);
+            const newDateStr = document.getElementById('baseDate').value;
+            if(!newDateStr) return;
+            const newDate = new Date(newDateStr + "T00:00:00");
+            baseDate = newDate;
             await updateGlobalConfig({ baseDate: baseDate.toISOString() });
-        }
-
-        // --- DATA METHODS ---
+        };
 
         window.createNewVersion = async () => {
             const name = document.getElementById('newVersionName').value.trim();
-            if (!name || schedules[name]) return showToast("Nombre no disponible.");
+            if (!name || schedules[name]) return showToast("Nombre no válido.");
             const copy = JSON.parse(JSON.stringify(schedules[currentScheduleName]));
             copy.name = name;
             await saveScheduleToCloud(name, copy);
             currentScheduleName = name;
             toggleModal('versionModal');
-        }
+        };
 
         window.deleteCurrentVersion = async () => {
-            if (currentScheduleName === "Horario Principal") return showToast("Versión base protegida.");
+            if (currentScheduleName === "Horario Principal") return showToast("Versión protegida.");
             if (!confirm(`¿Eliminar la versión ${currentScheduleName}?`)) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName));
             currentScheduleName = "Horario Principal";
-        }
+        };
 
         window.addWorker = async () => {
             const name = document.getElementById('workerName').value.toUpperCase();
@@ -514,16 +353,14 @@
             active.workers.push({ id: Date.now(), name, color: document.getElementById('workerColor').value });
             document.getElementById('workerName').value = '';
             await saveScheduleToCloud(currentScheduleName, active);
-            renderWorkerList();
-        }
+        };
 
         window.deleteWorker = async (id) => {
-            if (!confirm("¿Eliminar este asesor de la lista?")) return;
+            if (!confirm("¿Eliminar asesor?")) return;
             const active = schedules[currentScheduleName];
             active.workers = active.workers.filter(w => w.id !== id);
             await saveScheduleToCloud(currentScheduleName, active);
-            renderWorkerList();
-        }
+        };
 
         window.addStore = async () => {
             const n = document.getElementById('storeName').value;
@@ -533,20 +370,21 @@
             document.getElementById('storeName').value = '';
             toggleModal('storeModal');
             await saveScheduleToCloud(currentScheduleName, active);
-        }
+        };
 
         window.deleteStore = async (id) => {
-            if(!confirm('¿Eliminar esta tienda por completo?')) return;
+            if(!confirm('¿Eliminar tienda?')) return;
             const active = schedules[currentScheduleName];
             active.stores = active.stores.filter(s => s.id !== id);
             await saveScheduleToCloud(currentScheduleName, active);
-        }
+        };
 
         window.addSlot = async (id, type) => {
             const active = schedules[currentScheduleName];
-            active.stores.find(s => s.id == id).slots[type]++;
+            const store = active.stores.find(s => s.id == id);
+            store.slots[type]++;
             await saveScheduleToCloud(currentScheduleName, active);
-        }
+        };
 
         window.removeSlot = async (id, type) => {
             const active = schedules[currentScheduleName];
@@ -555,7 +393,7 @@
                 store.slots[type]--;
                 await saveScheduleToCloud(currentScheduleName, active);
             }
-        }
+        };
 
         window.changeEditWeek = (w) => {
             currentEditWeek = w;
@@ -563,14 +401,14 @@
                 const btn = document.getElementById(`btnW${n}`);
                 if(btn) btn.className = n === w ? 'px-5 py-2.5 rounded-lg text-sm font-black bg-amber-500 text-white shadow-md' : 'px-5 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100';
             });
-            renderAll();
-        }
-
-        // --- ASIGNACIONES ---
+            window.renderAll();
+        };
 
         window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
             if (!isAdmin) return;
             const active = schedules[currentScheduleName];
+            if(!active) return;
+            
             const target = { week: currentEditWeek, storeId, dayIdx, type, slotIdx, date, workerId };
             document.getElementById('assignTarget').value = JSON.stringify(target);
             
@@ -604,10 +442,10 @@
                 document.getElementById('deleteAssignmentBtn').classList.add('hidden');
             }
             
-            document.getElementById('assignTitle').innerText = date ? `Turno: ${date}` : `Base: ${type} ${slotIdx+1}`;
+            document.getElementById('assignTitle').innerText = date ? `Turno Temporal: ${date}` : `Asignar: ${type} ${slotIdx+1}`;
             toggleRestUI();
             toggleModal('assignModal');
-        }
+        };
 
         window.saveAssignment = async () => {
             const active = schedules[currentScheduleName];
@@ -616,7 +454,7 @@
             const untilDateStr = document.getElementById('untilDate').value;
             const workerId = target.date ? target.workerId : document.getElementById('workerSelect').value;
 
-            if (!workerId && !target.date) return showToast("Selecciona un asesor.");
+            if (!workerId && !target.date) return showToast("Elige un asesor.");
 
             const shiftData = {
                 workerId: parseInt(workerId),
@@ -649,7 +487,7 @@
             
             await saveScheduleToCloud(currentScheduleName, active);
             toggleModal('assignModal');
-        }
+        };
 
         window.deleteAssignment = async () => {
             const active = schedules[currentScheduleName];
@@ -661,33 +499,128 @@
             }
             await saveScheduleToCloud(currentScheduleName, active);
             toggleModal('assignModal');
-        }
+        };
 
         window.toggleRestUI = () => {
             const s = document.getElementById('specialStatus').value;
-            document.getElementById('timeFields').style.opacity = (s === 'Trabajo') ? "1" : "0.3";
-            document.getElementById('timeFields').style.pointerEvents = (s === 'Trabajo') ? "auto" : "none";
-        }
+            const timeFields = document.getElementById('timeFields');
+            if (timeFields) {
+                timeFields.style.opacity = (s === 'Trabajo') ? "1" : "0.3";
+                timeFields.style.pointerEvents = (s === 'Trabajo') ? "auto" : "none";
+            }
+        };
 
         window.toggleTempUI = () => {
             const isTemp = document.getElementById('isTemporary').checked;
-            document.getElementById('tempDateContainer').classList.toggle('hidden', !isTemp);
-        }
+            const container = document.getElementById('tempDateContainer');
+            if (container) container.classList.toggle('hidden', !isTemp);
+        };
 
         window.selectWorkerRow = (id) => {
             selectedWorkerRowId = (selectedWorkerRowId === id) ? null : id;
             renderIndividualView();
+        };
+
+        // --- FIRESTORE SYNC ---
+
+        async function checkAdminRegistration() {
+            try {
+                const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
+                const authTitle = document.getElementById('authTitle');
+                const authSubmit = document.getElementById('authSubmitBtn');
+                
+                if (adminDoc.exists()) {
+                    adminAccount = adminDoc.data();
+                    authTitle.innerText = "Iniciar Sesión";
+                    authSubmit.innerText = "Entrar";
+                } else {
+                    authTitle.innerText = "Registrar Admin";
+                    authSubmit.innerText = "Registrar Maestro";
+                }
+                document.getElementById('authUsername').value = "";
+                document.getElementById('authPassword').value = "";
+            } catch (e) { console.error("Admin check failed", e); }
         }
 
-        // --- RENDERS ---
+        function startDataSync() {
+            const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
+            onSnapshot(schedulesCol, (snapshot) => {
+                if (snapshot.empty) {
+                    const initial = {
+                        name: "Horario Principal",
+                        workers: [{ id: 1, name: 'DANIEL', color: '#3b82f6' }],
+                        stores: [{ id: 1, name: 'Open', slots: { 'Apertura': 1, 'Cierre': 1 } }],
+                        assignments: [],
+                        overrides: []
+                    };
+                    saveScheduleToCloud("Horario Principal", initial);
+                } else {
+                    snapshot.forEach(doc => { schedules[doc.id] = doc.data(); });
+                    updateVersionSelector();
+                    window.renderAll();
+                }
+            });
 
-        function renderAll() {
-            if (!schedules[currentScheduleName]) return;
-            populateWorkerSelects();
-            renderIndividualView();
-            renderStoreGrids();
-            lucide.createIcons();
-            document.getElementById('viewTitle').innerText = `${currentScheduleName}`;
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), (snap) => {
+                if (snap.exists() && snap.data().baseDate) {
+                    baseDate = new Date(snap.data().baseDate);
+                    document.getElementById('baseDate').valueAsDate = baseDate;
+                    window.renderAll();
+                }
+            });
+        }
+
+        async function saveScheduleToCloud(name, data) {
+            if (!auth.currentUser) return;
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data); } 
+            catch (e) { showToast("Error al guardar."); }
+        }
+
+        async function updateGlobalConfig(data) {
+            if (!auth.currentUser) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), data, { merge: true });
+        }
+
+        function executeLogin() {
+            isAdmin = true;
+            document.body.classList.add('is-admin');
+            document.getElementById('adminBadge').innerText = "ADMINISTRADOR";
+            document.getElementById('adminBadge').classList.replace('bg-slate-100', 'bg-blue-600');
+            document.getElementById('adminBadge').classList.replace('text-slate-500', 'text-white');
+            document.getElementById('loginBtn').innerText = "Cerrar Panel";
+            toggleModal('authModal');
+            window.renderAll();
+            showToast("Acceso concedido.");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function initWeekSelector() {
+            const select = document.getElementById('weekSelectorView');
+            if(!select) return;
+            select.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.textContent = `Semana ${i}`;
+                select.appendChild(opt);
+            }
+        }
+
+        function updateVersionSelector() {
+            const selector = document.getElementById('scheduleVersionSelector');
+            if(!selector) return;
+            selector.innerHTML = '';
+            Object.keys(schedules).forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name; opt.textContent = name;
+                if (name === currentScheduleName) opt.selected = true;
+                selector.appendChild(opt);
+            });
         }
 
         function populateWorkerSelects() {
@@ -699,8 +632,12 @@
         }
 
         function renderIndividualView() {
-            const week = parseInt(document.getElementById('weekSelectorView').value);
+            const weekSelector = document.getElementById('weekSelectorView');
+            if(!weekSelector) return;
+            const week = parseInt(weekSelector.value) || 1;
             const active = schedules[currentScheduleName];
+            if(!active) return;
+
             const header = document.getElementById('individualHeader');
             const body = document.getElementById('individualBody');
 
@@ -756,8 +693,10 @@
 
         function renderStoreGrids() {
             const container = document.getElementById('storesContainer');
+            if(!container) return;
             container.innerHTML = '';
             const active = schedules[currentScheduleName];
+            if(!active) return;
 
             active.stores.forEach(store => {
                 const card = document.createElement('div');
@@ -783,10 +722,10 @@
                 card.innerHTML = `
                     <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
                         <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span></div>
-                        <div class="admin-view flex gap-2">
+                        <div class="admin-only flex gap-2">
                             <button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold">+ APER</button>
                             <button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
-                            <div class="w-px bg-slate-700 h-4 mx-1"></div>
+                            <div class="w-px bg-slate-700 h-4 self-center mx-1"></div>
                             <button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold">+ CIER</button>
                             <button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
                             <button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -806,12 +745,33 @@
             const list = document.getElementById('workerList');
             if(!list) return;
             const active = schedules[currentScheduleName];
+            if(!active) return;
             list.innerHTML = '';
             active.workers.forEach(w => {
                 list.innerHTML += `<div class="flex items-center justify-between p-3 bg-slate-50 border rounded-xl shadow-sm"><div class="flex items-center gap-3"><span class="w-4 h-4 rounded-full" style="background:${w.color}"></span><span class="font-bold">${w.name}</span></div><button onclick="deleteWorker(${w.id})" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             });
-            lucide.createIcons();
         }
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('load', async () => {
+            initWeekSelector();
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { showToast("Error de conexión."); }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    document.getElementById('app').style.opacity = "1";
+                    startDataSync();
+                    checkAdminRegistration();
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
