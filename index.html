@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAC JAZBA - HORARIO LABORAL CLOUD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        
+        /* Estilos para columna fija de Asesor */
+        .sticky-col { 
+            position: sticky; 
+            left: 0; 
+            background-color: white !important; 
+            z-index: 30; 
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        thead th.sticky-col { z-index: 40; background-color: #f8fafc !important; }
+        
+        .highlight-cell { 
+            outline: 3px solid #facc15; 
+            outline-offset: -3px; 
+            animation: pulse-border 2s infinite; 
+        }
+        @keyframes pulse-border { 
+            0% { outline-color: #facc15; } 
+            50% { outline-color: #e11d48; } 
+            100% { outline-color: #facc15; } 
+        }
+
+        /* Resaltado de fila seleccionada */
+        .row-selected { background-color: #fef9c3 !important; }
+        .row-selected .sticky-col { background-color: #fef9c3 !important; }
+
+        /* Control de visibilidad para Admin */
+        .admin-view { display: none !important; }
+        .is-admin .admin-view { display: block !important; }
+        .is-admin .admin-flex { display: flex !important; }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: #1e293b;
+            color: white;
+            font-weight: bold;
+            z-index: 200;
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+        }
+        #toast.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans min-h-screen pb-10 transition-colors duration-300">
+
+    <div id="app" class="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto opacity-0 transition-opacity duration-500">
+        <!-- HEADER PRINCIPAL -->
+        <header class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-200">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none uppercase">DAC JAZBA</h1>
+                    <p class="text-blue-600 font-bold text-xs uppercase tracking-widest mt-1">Horario Laboral Cloud</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span id="adminBadge" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold uppercase">Modo Lector</span>
+                        <button onclick="showLoginModal()" id="loginBtn" class="text-[10px] text-blue-600 font-bold hover:underline uppercase">Acceso Admin</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <!-- Solo Admin ve Versiones -->
+                <div class="admin-view flex-col border-r border-slate-200 pr-3">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Versión Activa</label>
+                    <div class="flex gap-2">
+                        <select id="scheduleVersionSelector" onchange="switchSchedule()" class="bg-white border-slate-200 rounded-lg text-xs font-bold p-1.5 shadow-sm outline-none"></select>
+                        <button onclick="deleteCurrentVersion()" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar Versión Actual">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="admin-view flex gap-2">
+                    <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Gestionar Versiones">
+                        <i data-lucide="copy-plus" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm">
+                        <i data-lucide="users" class="w-4 h-4"></i> Personal
+                    </button>
+                    <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm">
+                        <i data-lucide="store" class="w-4 h-4"></i> Tienda
+                    </button>
+                </div>
+
+                <div class="flex flex-col pl-3 border-l border-slate-200">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Fecha de Inicio (Ciclo)</label>
+                    <input type="date" id="baseDate" onchange="updateDates()" class="bg-white border border-slate-200 rounded-lg p-1.5 font-bold text-slate-700 outline-none text-xs">
+                </div>
+            </div>
+        </header>
+
+        <!-- CRONOGRAMA PRINCIPAL -->
+        <section class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-500 p-2 rounded-lg text-white shadow-inner"><i data-lucide="calendar" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-700 uppercase tracking-tight" id="viewTitle">Sincronizando con la nube...</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-black text-slate-400 uppercase">Ver Semana:</span>
+                    <select id="weekSelectorView" onchange="renderAll()" class="bg-white border-slate-200 rounded-lg text-sm font-bold p-2 shadow-sm outline-none"></select>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[1400px]">
+                    <thead>
+                        <tr id="individualHeader" class="bg-slate-50 text-slate-500 uppercase text-[11px] font-black tracking-wider"></tr>
+                    </thead>
+                    <tbody id="individualBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CONFIGURACIÓN BASE -->
+        <div class="flex flex-col space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 uppercase tracking-tight">
+                    <i data-lucide="settings" class="text-amber-500"></i> Configuración del Ciclo Base
+                </h2>
+                <div class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <button onclick="changeEditWeek(1)" id="btnW1" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 1</button>
+                    <button onclick="changeEditWeek(2)" id="btnW2" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 2</button>
+                    <button onclick="changeEditWeek(3)" id="btnW3" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 3</button>
+                </div>
+            </div>
+            <div id="storesContainer" class="space-y-6"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: LOGIN / REGISTRO ADMIN -->
+    <div id="authModal" class="fixed inset-0 modal-overlay hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden p-8 space-y-6">
+            <div class="text-center">
+                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="lock" class="text-blue-600 w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Validando...</h3>
+                <p class="text-slate-400 text-sm" id="authSubtitle">Seguridad DAC JAZBA</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="authUsername" placeholder="Usuario" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
+                <input type="password" id="authPassword" placeholder="Contraseña" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
+                <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Entrar</button>
+            </div>
+            <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: ASIGNAR TURNO -->
+    <div id="assignModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="text-xl font-bold" id="assignTitle">Programar Turno</h3>
+                <button onclick="toggleModal('assignModal')" class="bg-white/10 p-2 rounded-full hover:bg-white/20"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-8 space-y-4">
+                <input type="hidden" id="assignTarget">
+                
+                <div id="workerField" class="admin-view">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Asesor</label>
+                    <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Estado</label>
+                        <select id="specialStatus" onchange="toggleRestUI()" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold text-xs uppercase">
+                            <option value="Trabajo">TRABAJO</option>
+                            <option value="Descanso">DESCANSO</option>
+                            <option value="Vacaciones">VACACIONES</option>
+                            <option value="Permiso">PERMISO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Receso (Min)</label>
+                        <input type="number" id="breakMinutes" value="45" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
+                    </div>
+                </div>
+
+                <div id="timeFields" class="grid grid-cols-2 gap-4">
+                    <input type="time" id="startTime" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
+                    <input type="time" id="endTime" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold">
+                </div>
+
+                <div class="flex items-center gap-3 bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <input type="checkbox" id="isHighlighted" class="w-5 h-5 accent-amber-600 rounded cursor-pointer">
+                    <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide">
+                        <i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio
+                    </label>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="isTemporary" onchange="toggleTempUI()" class="w-4 h-4 accent-blue-600 rounded">
+                        <label for="isTemporary" class="font-bold text-blue-700 text-xs uppercase tracking-tight">¿Cambio temporal?</label>
+                    </div>
+                    <div id="tempDateContainer" class="hidden">
+                        <label class="block text-[9px] font-black text-blue-400 uppercase mb-1">Válido hasta:</label>
+                        <input type="date" id="untilDate" class="w-full border-blue-200 rounded-lg p-2 font-bold text-xs">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col gap-3">
+                     <button onclick="saveAssignment()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-xs">Guardar Cambios</button>
+                     <button id="deleteAssignmentBtn" onclick="deleteAssignment()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold hover:bg-red-100 flex items-center justify-center gap-2 text-xs">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> ELIMINAR ASIGNACIÓN
+                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES GESTIÓN -->
+    <div id="versionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-4 text-center">
+            <h3 class="text-xl font-bold text-slate-800">Duplicar Horario</h3>
+            <input type="text" id="newVersionName" placeholder="Nombre (ej. Horario Mayo)" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
+            <button onclick="createNewVersion()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-xs uppercase">Crear Copia</button>
+            <button onclick="toggleModal('versionModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
+             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Gestionar Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
+             <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl border-2 border-slate-100"></div>
+             <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir Asesor</button>
+             <div id="workerList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
+        </div>
+    </div>
+
+    <div id="storeModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Nueva Tienda</h3><button onclick="toggleModal('storeModal')"><i data-lucide="x"></i></button></div>
+             <input type="text" id="storeName" placeholder="Nombre Local" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
+             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Crear</button>
+        </div>
+    </div>
+
+    <div id="toast">Notificación</div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURACIÓN Y ESTADO ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyCrIx2vVDC46s2Ndj4nJRJcvBIpeBaYwr0",
+  authDomain: "horario-laboral-jazba.firebaseapp.com",
+  projectId: "horario-laboral-jazba",
+  storageBucket: "horario-laboral-jazba.firebasestorage.app",
+  messagingSenderId: "478270592308",
+  appId: "1:478270592308:web:cae54c438f25efe82c8161"
+};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dac-jazba-prod';
+
+        let isAdmin = false;
+        let adminAccount = null; 
+        let currentScheduleName = "Horario Principal";
+        let selectedWorkerRowId = null;
+        let schedules = {};
+        let currentEditWeek = 1;
+        let baseDate = new Date();
+        baseDate.setDate(baseDate.getDate() - (baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1));
+
+        const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+        // --- INICIALIZACIÓN SEGURA ---
+        window.addEventListener('load', async () => {
+            initWeekSelector();
+            
+            try {
+                // Prioridad a token personalizado si existe
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Auth error:", e);
+                showToast("Error de conexión inicial.");
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    document.getElementById('app').style.opacity = "1";
+                    // Solo iniciamos snapshots cuando el usuario está logueado
+                    startDataSync();
+                    checkAdminRegistration();
+                }
+            });
+        });
+
+        // --- FIRESTORE SYNC ---
+
+        async function checkAdminRegistration() {
+            if (!auth.currentUser) return;
+            // Usamos una ruta plana de colección para config según Regla 1
+            try {
+                const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
+                if (adminDoc.exists()) {
+                    adminAccount = adminDoc.data();
+                    document.getElementById('authTitle').innerText = "Iniciar Sesión";
+                    document.getElementById('authSubtitle').innerText = "Identifícate como administrador";
+                    document.getElementById('authSubmitBtn').innerText = "Entrar";
+                    // Limpiar campos para que no aparezcan escritos del registro
+                    document.getElementById('authUsername').value = "";
+                    document.getElementById('authPassword').value = "";
+                } else {
+                    document.getElementById('authTitle').innerText = "Registrar Admin";
+                    document.getElementById('authSubtitle').innerText = "Crea el usuario maestro para gestionar";
+                    document.getElementById('authSubmitBtn').innerText = "Registrar Maestro";
+                }
+            } catch (e) {
+                console.error("Config check error:", e);
+            }
+        }
+
+        function startDataSync() {
+            if (!auth.currentUser) return;
+
+            // Escuchar Horarios
+            const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
+            onSnapshot(schedulesCol, (snapshot) => {
+                if (snapshot.empty) {
+                    const initial = {
+                        name: "Horario Principal",
+                        workers: [{ id: 1, name: 'DANIEL', color: '#3b82f6' }],
+                        stores: [{ id: 1, name: 'Tienda 1', slots: { 'Apertura': 1, 'Cierre': 1 } }],
+                        assignments: [],
+                        overrides: []
+                    };
+                    saveScheduleToCloud("Horario Principal", initial);
+                } else {
+                    snapshot.forEach(doc => {
+                        schedules[doc.id] = doc.data();
+                    });
+                    updateVersionSelector();
+                    renderAll();
+                }
+            }, (err) => console.error("Snapshot error schedules:", err));
+
+            // Escuchar Fecha Global
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), (snap) => {
+                if (snap.exists() && snap.data().baseDate) {
+                    baseDate = new Date(snap.data().baseDate);
+                    document.getElementById('baseDate').valueAsDate = baseDate;
+                    renderAll();
+                }
+            }, (err) => console.error("Snapshot error globals:", err));
+        }
+
+        async function saveScheduleToCloud(name, data) {
+            if (!auth.currentUser) return;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data);
+            } catch (e) { showToast("Error al guardar cambios."); }
+        }
+
+        async function updateGlobalConfig(data) {
+            if (!auth.currentUser) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), data, { merge: true });
+        }
+
+        // --- SEGURIDAD ---
+
+        window.handleAuthAction = async () => {
+            const user = document.getElementById('authUsername').value.trim();
+            const pass = document.getElementById('authPassword').value.trim();
+
+            if (!user || !pass) return showToast("Faltan datos.");
+
+            if (!adminAccount) {
+                // Registro inicial de admin
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'), { user, pass });
+                    showToast("Administrador registrado.");
+                    adminAccount = { user, pass };
+                    executeLogin();
+                } catch (e) { showToast("Error al registrar."); }
+            } else {
+                // Login normal
+                if (user === adminAccount.user && pass === adminAccount.pass) {
+                    executeLogin();
+                } else {
+                    showToast("Usuario o clave incorrectos.");
+                }
+            }
+        };
+
+        function executeLogin() {
+            isAdmin = true;
+            document.body.classList.add('is-admin');
+            document.getElementById('adminBadge').innerText = "ADMINISTRADOR";
+            document.getElementById('adminBadge').classList.replace('bg-slate-100', 'bg-blue-600');
+            document.getElementById('adminBadge').classList.replace('text-slate-500', 'text-white');
+            document.getElementById('loginBtn').innerText = "Cerrar Panel";
+            toggleModal('authModal');
+            renderAll();
+            showToast("Acceso concedido.");
+        }
+
+        window.showLoginModal = () => {
+            if (isAdmin) {
+                isAdmin = false;
+                document.body.classList.remove('is-admin');
+                document.getElementById('adminBadge').innerText = "Modo Lector";
+                document.getElementById('adminBadge').classList.replace('bg-blue-600', 'bg-slate-100');
+                document.getElementById('adminBadge').classList.replace('text-white', 'text-slate-500');
+                document.getElementById('loginBtn').innerText = "Acceso Admin";
+                renderAll();
+                return;
+            }
+            toggleModal('authModal');
+        }
+
+        // --- UI UTILS ---
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        window.toggleModal = (id) => {
+            document.getElementById(id).classList.toggle('hidden');
+            if(id === 'workerModal') renderWorkerList();
+        }
+
+        function initWeekSelector() {
+            const select = document.getElementById('weekSelectorView');
+            select.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.textContent = `Semana ${i}`;
+                select.appendChild(opt);
+            }
+        }
+
+        function updateVersionSelector() {
+            const selector = document.getElementById('scheduleVersionSelector');
+            selector.innerHTML = '';
+            Object.keys(schedules).forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name; opt.textContent = name;
+                if (name === currentScheduleName) opt.selected = true;
+                selector.appendChild(opt);
+            });
+        }
+
+        window.switchSchedule = () => {
+            currentScheduleName = document.getElementById('scheduleVersionSelector').value;
+            renderAll();
+        }
+
+        window.updateDates = async () => {
+            if (!isAdmin) return;
+            const newDate = document.getElementById('baseDate').value + "T00:00:00";
+            baseDate = new Date(newDate);
+            await updateGlobalConfig({ baseDate: baseDate.toISOString() });
+        }
+
+        // --- DATA METHODS ---
+
+        window.createNewVersion = async () => {
+            const name = document.getElementById('newVersionName').value.trim();
+            if (!name || schedules[name]) return showToast("Nombre no disponible.");
+            const copy = JSON.parse(JSON.stringify(schedules[currentScheduleName]));
+            copy.name = name;
+            await saveScheduleToCloud(name, copy);
+            currentScheduleName = name;
+            toggleModal('versionModal');
+        }
+
+        window.deleteCurrentVersion = async () => {
+            if (currentScheduleName === "Horario Principal") return showToast("Versión base protegida.");
+            if (!confirm(`¿Eliminar la versión ${currentScheduleName}?`)) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName));
+            currentScheduleName = "Horario Principal";
+        }
+
+        window.addWorker = async () => {
+            const name = document.getElementById('workerName').value.toUpperCase();
+            if (!name) return;
+            const active = schedules[currentScheduleName];
+            active.workers.push({ id: Date.now(), name, color: document.getElementById('workerColor').value });
+            document.getElementById('workerName').value = '';
+            await saveScheduleToCloud(currentScheduleName, active);
+            renderWorkerList();
+        }
+
+        window.deleteWorker = async (id) => {
+            if (!confirm("¿Eliminar este asesor de la lista?")) return;
+            const active = schedules[currentScheduleName];
+            active.workers = active.workers.filter(w => w.id !== id);
+            await saveScheduleToCloud(currentScheduleName, active);
+            renderWorkerList();
+        }
+
+        window.addStore = async () => {
+            const n = document.getElementById('storeName').value;
+            if(!n) return;
+            const active = schedules[currentScheduleName];
+            active.stores.push({ id: Date.now(), name: n, slots: { 'Apertura': 1, 'Cierre': 1 } });
+            document.getElementById('storeName').value = '';
+            toggleModal('storeModal');
+            await saveScheduleToCloud(currentScheduleName, active);
+        }
+
+        window.deleteStore = async (id) => {
+            if(!confirm('¿Eliminar esta tienda por completo?')) return;
+            const active = schedules[currentScheduleName];
+            active.stores = active.stores.filter(s => s.id !== id);
+            await saveScheduleToCloud(currentScheduleName, active);
+        }
+
+        window.addSlot = async (id, type) => {
+            const active = schedules[currentScheduleName];
+            active.stores.find(s => s.id == id).slots[type]++;
+            await saveScheduleToCloud(currentScheduleName, active);
+        }
+
+        window.removeSlot = async (id, type) => {
+            const active = schedules[currentScheduleName];
+            const store = active.stores.find(s => s.id == id);
+            if (store.slots[type] > 0) {
+                store.slots[type]--;
+                await saveScheduleToCloud(currentScheduleName, active);
+            }
+        }
+
+        window.changeEditWeek = (w) => {
+            currentEditWeek = w;
+            [1, 2, 3].forEach(n => {
+                const btn = document.getElementById(`btnW${n}`);
+                if(btn) btn.className = n === w ? 'px-5 py-2.5 rounded-lg text-sm font-black bg-amber-500 text-white shadow-md' : 'px-5 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100';
+            });
+            renderAll();
+        }
+
+        // --- ASIGNACIONES ---
+
+        window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
+            if (!isAdmin) return;
+            const active = schedules[currentScheduleName];
+            const target = { week: currentEditWeek, storeId, dayIdx, type, slotIdx, date, workerId };
+            document.getElementById('assignTarget').value = JSON.stringify(target);
+            
+            document.getElementById('isTemporary').checked = false;
+            document.getElementById('untilDate').value = "";
+            toggleTempUI();
+
+            let existing = null;
+            if (date) {
+                existing = active.overrides?.find(o => o.date === date && o.workerId == workerId);
+                document.getElementById('workerField').classList.add('hidden');
+            } else {
+                existing = active.assignments.find(a => a.week === target.week && a.storeId == storeId && a.dayIdx === dayIdx && a.type === type && a.slotIdx === slotIdx);
+                document.getElementById('workerField').classList.remove('hidden');
+            }
+
+            if (existing) {
+                if(!date) document.getElementById('workerSelect').value = existing.workerId;
+                document.getElementById('startTime').value = existing.start;
+                document.getElementById('endTime').value = existing.end;
+                document.getElementById('specialStatus').value = existing.status || 'Trabajo';
+                document.getElementById('breakMinutes').value = existing.breakMinutes || 45;
+                document.getElementById('isHighlighted').checked = !!existing.highlighted;
+                document.getElementById('deleteAssignmentBtn').classList.remove('hidden');
+            } else {
+                if(!date) document.getElementById('workerSelect').value = "";
+                document.getElementById('startTime').value = '08:00';
+                document.getElementById('endTime').value = '15:00';
+                document.getElementById('specialStatus').value = 'Trabajo';
+                document.getElementById('isHighlighted').checked = false;
+                document.getElementById('deleteAssignmentBtn').classList.add('hidden');
+            }
+            
+            document.getElementById('assignTitle').innerText = date ? `Turno: ${date}` : `Base: ${type} ${slotIdx+1}`;
+            toggleRestUI();
+            toggleModal('assignModal');
+        }
+
+        window.saveAssignment = async () => {
+            const active = schedules[currentScheduleName];
+            const target = JSON.parse(document.getElementById('assignTarget').value);
+            const isTemp = document.getElementById('isTemporary').checked;
+            const untilDateStr = document.getElementById('untilDate').value;
+            const workerId = target.date ? target.workerId : document.getElementById('workerSelect').value;
+
+            if (!workerId && !target.date) return showToast("Selecciona un asesor.");
+
+            const shiftData = {
+                workerId: parseInt(workerId),
+                start: document.getElementById('startTime').value,
+                end: document.getElementById('endTime').value,
+                status: document.getElementById('specialStatus').value,
+                breakMinutes: document.getElementById('breakMinutes').value,
+                highlighted: document.getElementById('isHighlighted').checked
+            };
+
+            if (target.date || isTemp) {
+                if (!active.overrides) active.overrides = [];
+                if (isTemp && untilDateStr) {
+                    let curr = new Date((target.date || baseDate.toISOString().split('T')[0]) + "T00:00:00");
+                    let limit = new Date(untilDateStr + "T00:00:00");
+                    while (curr <= limit) {
+                        const dStr = curr.toISOString().split('T')[0];
+                        active.overrides = active.overrides.filter(o => !(o.date === dStr && o.workerId == workerId));
+                        active.overrides.push({ ...shiftData, date: dStr });
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                } else if (target.date) {
+                    active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == workerId));
+                    active.overrides.push({ ...shiftData, date: target.date });
+                }
+            } else {
+                active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
+                if (workerId) active.assignments.push({ ...target, ...shiftData });
+            }
+            
+            await saveScheduleToCloud(currentScheduleName, active);
+            toggleModal('assignModal');
+        }
+
+        window.deleteAssignment = async () => {
+            const active = schedules[currentScheduleName];
+            const target = JSON.parse(document.getElementById('assignTarget').value);
+            if (target.date) {
+                active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == target.workerId));
+            } else {
+                active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
+            }
+            await saveScheduleToCloud(currentScheduleName, active);
+            toggleModal('assignModal');
+        }
+
+        window.toggleRestUI = () => {
+            const s = document.getElementById('specialStatus').value;
+            document.getElementById('timeFields').style.opacity = (s === 'Trabajo') ? "1" : "0.3";
+            document.getElementById('timeFields').style.pointerEvents = (s === 'Trabajo') ? "auto" : "none";
+        }
+
+        window.toggleTempUI = () => {
+            const isTemp = document.getElementById('isTemporary').checked;
+            document.getElementById('tempDateContainer').classList.toggle('hidden', !isTemp);
+        }
+
+        window.selectWorkerRow = (id) => {
+            selectedWorkerRowId = (selectedWorkerRowId === id) ? null : id;
+            renderIndividualView();
+        }
+
+        // --- RENDERS ---
+
+        function renderAll() {
+            if (!schedules[currentScheduleName]) return;
+            populateWorkerSelects();
+            renderIndividualView();
+            renderStoreGrids();
+            lucide.createIcons();
+            document.getElementById('viewTitle').innerText = `${currentScheduleName}`;
+        }
+
+        function populateWorkerSelects() {
+            const s = document.getElementById('workerSelect');
+            if(!s) return;
+            const active = schedules[currentScheduleName];
+            s.innerHTML = '<option value="">(Seleccionar)</option>';
+            active.workers.forEach(w => s.innerHTML += `<option value="${w.id}">${w.name}</option>`);
+        }
+
+        function renderIndividualView() {
+            const week = parseInt(document.getElementById('weekSelectorView').value);
+            const active = schedules[currentScheduleName];
+            const header = document.getElementById('individualHeader');
+            const body = document.getElementById('individualBody');
+
+            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200">Asesor</th>`;
+            DAYS.forEach((d, idx) => {
+                let dNum = new Date(baseDate);
+                dNum.setDate(dNum.getDate() + (week - 1) * 7 + idx);
+                const displayDate = dNum.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+                header.innerHTML += `<th class="p-4 text-center border-r border-slate-200 min-w-[180px]"><div class="flex flex-col"><span class="text-blue-600 font-black">${d}</span><span class="text-slate-400 font-bold">${displayDate}</span></div></th>`;
+            });
+
+            body.innerHTML = '';
+            active.workers.forEach(worker => {
+                const isSelected = selectedWorkerRowId === worker.id;
+                let row = `<tr class="${isSelected ? 'row-selected' : ''}">
+                    <td onclick="selectWorkerRow(${worker.id})" class="p-4 font-black sticky-col border-r border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-8 rounded-full" style="background: ${worker.color}"></span>
+                            <span class="text-slate-700">${worker.name}</span>
+                        </div>
+                    </td>`;
+                
+                DAYS.forEach((_, dIdx) => {
+                    let dNum = new Date(baseDate);
+                    dNum.setDate(dNum.getDate() + (week - 1) * 7 + dIdx);
+                    const fullDate = dNum.toISOString().split('T')[0];
+                    const baseWeek = ((week - 1) % 3) + 1;
+                    
+                    let shifts = active.overrides?.filter(o => o.date === fullDate && o.workerId === worker.id);
+                    if (!shifts || shifts.length === 0) {
+                        shifts = active.assignments.filter(a => a.week === baseWeek && a.dayIdx === dIdx && a.workerId === worker.id);
+                    }
+
+                    row += `<td onclick="openAssignModal(null, ${dIdx}, null, 0, '${fullDate}', ${worker.id})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-white/50' : ''}">
+                        <div class="flex flex-col gap-1">
+                            ${shifts.length > 0 ? shifts.map(s => {
+                                const st = active.stores.find(tienda => tienda.id == s.storeId);
+                                let colorClass = "bg-slate-50 border-slate-200 text-slate-700";
+                                if(s.status === 'Descanso') colorClass = "bg-amber-100 border-amber-300 text-amber-700";
+                                else if(s.status === 'Vacaciones') colorClass = "bg-emerald-100 border-emerald-300 text-emerald-700";
+                                else if(s.status === 'Permiso') colorClass = "bg-purple-100 border-purple-300 text-purple-700";
+                                return `<div class="text-[10px] p-2 rounded-lg border font-bold ${colorClass} ${s.highlighted ? 'highlight-cell' : ''}">
+                                        <div class="uppercase flex items-center gap-1 truncate"><i data-lucide="${s.status === 'Trabajo' ? 'map-pin' : 'clock'}" class="w-3 h-3"></i> ${s.status === 'Trabajo' ? (st?st.name:'Asignado') : s.status}</div>
+                                        ${s.status === 'Trabajo' ? `<div class="text-blue-600 mt-1">${s.start}-${s.end}</div><div class="text-[8px] text-slate-400 mt-0.5">Receso: ${s.breakMinutes}m</div>` : ''}
+                                    </div>`;
+                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4">Libre</div>`}
+                        </div>
+                    </td>`;
+                });
+                body.innerHTML += row + `</tr>`;
+            });
+        }
+
+        function renderStoreGrids() {
+            const container = document.getElementById('storesContainer');
+            container.innerHTML = '';
+            const active = schedules[currentScheduleName];
+
+            active.stores.forEach(store => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm";
+                let rows = '';
+                ['Apertura', 'Cierre'].forEach(type => {
+                    for (let i = 0; i < store.slots[type]; i++) {
+                        rows += `<tr class="border-b border-slate-100">
+                            <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center">${type} ${i+1}</td>
+                            ${DAYS.map((_, dIdx) => {
+                                const a = active.assignments.find(as => as.week === currentEditWeek && as.storeId == store.id && as.dayIdx === dIdx && as.type === type && as.slotIdx === i);
+                                const w = a ? active.workers.find(usr => usr.id == a.workerId) : null;
+                                let style = w ? `background: ${w.color}15; color: ${w.color}; border: 1.5px solid ${w.color}` : '';
+                                return `<td onclick="openAssignModal(${store.id}, ${dIdx}, '${type}', ${i})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default'} h-14 transition-all">
+                                    <div class="w-full h-full flex items-center justify-center rounded-xl text-[10px] font-bold" style="${style}">
+                                        ${w ? w.name : '<span class="text-slate-200 italic">...</span>'}
+                                    </div>
+                                </td>`;
+                            }).join('')}
+                        </tr>`;
+                    }
+                });
+                card.innerHTML = `
+                    <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
+                        <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span></div>
+                        <div class="admin-view flex gap-2">
+                            <button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold">+ APER</button>
+                            <button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
+                            <div class="w-px bg-slate-700 h-4 mx-1"></div>
+                            <button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold">+ CIER</button>
+                            <button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
+                            <button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse min-w-[1200px]">
+                            <thead class="bg-slate-50"><tr><th class="p-3 border-r w-24 text-[10px] font-black uppercase text-slate-400">Turno</th>${DAYS.map(d=>`<th class="p-3 border-r text-[10px] font-black uppercase text-slate-500">${d}</th>`).join('')}</tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        function renderWorkerList() {
+            const list = document.getElementById('workerList');
+            if(!list) return;
+            const active = schedules[currentScheduleName];
+            list.innerHTML = '';
+            active.workers.forEach(w => {
+                list.innerHTML += `<div class="flex items-center justify-between p-3 bg-slate-50 border rounded-xl shadow-sm"><div class="flex items-center gap-3"><span class="w-4 h-4 rounded-full" style="background:${w.color}"></span><span class="font-bold">${w.name}</span></div><button onclick="deleteWorker(${w.id})" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+            });
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
