@@ -245,7 +245,14 @@
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- CONFIG Y ESTADO ---
-        const firebaseConfig = JSON.parse(__firebase_config);
+        const firebaseConfig = {
+  apiKey: "AIzaSyCrIx2vVDC46s2Ndj4nJRJcvBIpeBaYwr0",
+  authDomain: "horario-laboral-jazba.firebaseapp.com",
+  projectId: "horario-laboral-jazba",
+  storageBucket: "horario-laboral-jazba.firebasestorage.app",
+  messagingSenderId: "478270592308",
+  appId: "1:478270592308:web:cae54c438f25efe82c8161"
+};
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
