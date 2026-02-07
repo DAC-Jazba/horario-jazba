@@ -157,17 +157,17 @@
     </div>
 
     <!-- MODAL: ASIGNAR TURNO -->
-    <div id="assignModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+    <div id="assignModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 my-8">
             <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
                 <h3 class="text-xl font-bold" id="assignTitle">Programar Turno</h3>
                 <button onclick="toggleModal('assignModal')" class="bg-white/10 p-2 rounded-full hover:bg-white/20"><i data-lucide="x"></i></button>
             </div>
             <div class="p-8 space-y-4">
                 <input type="hidden" id="assignTarget">
-                <div id="workerField" class="admin-only">
+                <div id="workerField">
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Asesor</label>
-                    <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none"></select>
+                    <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -192,18 +192,50 @@
                     <input type="checkbox" id="isHighlighted" class="w-5 h-5 accent-amber-600 rounded cursor-pointer">
                     <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide"><i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio</label>
                 </div>
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
+                
+                <!-- SECCIÓN DE REPLICACIÓN (SOLO PARA BASE) -->
+                <div id="replicationSection" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="flex items-center gap-2">
-                        <input type="checkbox" id="isTemporary" onchange="toggleTempUI()" class="w-4 h-4 accent-blue-600 rounded">
-                        <label for="isTemporary" class="font-bold text-blue-700 text-xs uppercase tracking-tight">¿Cambio temporal?</label>
+                        <input type="checkbox" id="doReplicate" onchange="toggleReplicationOptions()" class="w-4 h-4 accent-blue-600 rounded">
+                        <label for="doReplicate" class="font-bold text-blue-700 text-xs uppercase tracking-tight">Replicar este horario</label>
                     </div>
-                    <div id="tempDateContainer" class="hidden">
-                        <label class="block text-[9px] font-black text-blue-400 uppercase mb-1">Válido hasta:</label>
-                        <input type="date" id="untilDate" class="w-full border-blue-200 rounded-lg p-2 font-bold text-xs">
+                    <div id="replicationOptions" class="hidden space-y-3">
+                        <div>
+                            <p class="text-[9px] font-black text-blue-400 uppercase mb-2">Semanas:</p>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="1"> W1</label>
+                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="2"> W2</label>
+                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="3"> W3</label>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-black text-blue-400 uppercase mb-2">Días:</p>
+                            <div class="grid grid-cols-4 gap-2">
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="0"> Lu</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="1"> Ma</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="2"> Mi</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="3"> Ju</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="4"> Vi</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="5"> Sá</label>
+                                <label class="flex items-center gap-1 text-[10px] font-bold"><input type="checkbox" class="rep-day" value="6"> Do</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div id="tempSection" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="isTemporary" onchange="toggleTempUI()" class="w-4 h-4 accent-slate-600 rounded">
+                        <label for="isTemporary" class="font-bold text-slate-700 text-xs uppercase tracking-tight">Cambio temporal por fecha</label>
+                    </div>
+                    <div id="tempDateContainer" class="hidden">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Válido hasta:</label>
+                        <input type="date" id="untilDate" class="w-full border-slate-200 rounded-lg p-2 font-bold text-xs">
+                    </div>
+                </div>
+
                 <div class="pt-4 flex flex-col gap-3">
-                     <button onclick="saveAssignment()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-xs">Guardar</button>
+                     <button onclick="saveAssignment()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-xs">Guardar Cambios</button>
                      <button id="deleteAssignmentBtn" onclick="deleteAssignment()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold hover:bg-red-100 flex items-center justify-center gap-2 text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i> ELIMINAR</button>
                 </div>
             </div>
@@ -222,7 +254,7 @@
 
     <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
-             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
+             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Gestionar Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
              <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl border-2 border-slate-100"></div>
              <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir Asesor</button>
              <div id="workerList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
@@ -269,7 +301,7 @@
 
         const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-        // --- EXPORTAR FUNCIONES AL GLOBAL (Solución al ReferenceError) ---
+        // --- EXPORTAR FUNCIONES AL GLOBAL ---
         
         window.renderAll = () => {
             const active = schedules[currentScheduleName];
@@ -304,9 +336,7 @@
         window.handleAuthAction = async () => {
             const user = document.getElementById('authUsername').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
-
             if (!user || !pass) return showToast("Faltan datos.");
-
             if (!adminAccount) {
                 try {
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'), { user, pass });
@@ -317,7 +347,7 @@
                 if (user === adminAccount.user && pass === adminAccount.pass) {
                     executeLogin();
                 } else {
-                    showToast("Usuario o contraseña incorrectos.");
+                    showToast("Credenciales incorrectas.");
                 }
             }
         };
@@ -411,6 +441,11 @@
             window.renderAll();
         };
 
+        window.toggleReplicationOptions = () => {
+            const isReplicating = document.getElementById('doReplicate').checked;
+            document.getElementById('replicationOptions').classList.toggle('hidden', !isReplicating);
+        };
+
         window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
             if (!isAdmin) return;
             const active = schedules[currentScheduleName];
@@ -421,7 +456,14 @@
             
             document.getElementById('isTemporary').checked = false;
             document.getElementById('untilDate').value = "";
+            document.getElementById('doReplicate').checked = false;
+            document.querySelectorAll('.rep-week, .rep-day').forEach(cb => cb.checked = false);
+            
             toggleTempUI();
+            toggleReplicationOptions();
+
+            // Ocultar replicación si es cambio temporal
+            document.getElementById('replicationSection').classList.toggle('hidden', !!date);
 
             let existing = null;
             if (date) {
@@ -449,7 +491,7 @@
                 document.getElementById('deleteAssignmentBtn').classList.add('hidden');
             }
             
-            document.getElementById('assignTitle').innerText = date ? `Turno Temporal: ${date}` : `Asignar: ${type} ${slotIdx+1}`;
+            document.getElementById('assignTitle').innerText = date ? `Turno Temporal: ${date}` : `Base: ${type} ${slotIdx+1}`;
             toggleRestUI();
             toggleModal('assignModal');
         };
@@ -458,6 +500,7 @@
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
             const isTemp = document.getElementById('isTemporary').checked;
+            const doReplicate = document.getElementById('doReplicate').checked;
             const untilDateStr = document.getElementById('untilDate').value;
             const workerId = target.date ? target.workerId : document.getElementById('workerSelect').value;
 
@@ -488,8 +531,26 @@
                     active.overrides.push({ ...shiftData, date: target.date });
                 }
             } else {
-                active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
-                if (workerId) active.assignments.push({ ...target, ...shiftData });
+                // Modo Base
+                if (doReplicate) {
+                    const selWeeks = Array.from(document.querySelectorAll('.rep-week:checked')).map(cb => parseInt(cb.value));
+                    const selDays = Array.from(document.querySelectorAll('.rep-day:checked')).map(cb => parseInt(cb.value));
+                    
+                    if (selWeeks.length === 0 || selDays.length === 0) return showToast("Marca semanas y días para replicar.");
+
+                    selWeeks.forEach(w => {
+                        selDays.forEach(d => {
+                            active.assignments = active.assignments.filter(a => !(a.week === w && a.storeId == target.storeId && a.dayIdx === d && a.type === target.type && a.slotIdx === target.slotIdx));
+                            active.assignments.push({ 
+                                week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, 
+                                ...shiftData 
+                            });
+                        });
+                    });
+                } else {
+                    active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
+                    active.assignments.push({ ...target, ...shiftData });
+                }
             }
             
             await saveScheduleToCloud(currentScheduleName, active);
@@ -535,7 +596,6 @@
                 const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
                 const authTitle = document.getElementById('authTitle');
                 const authSubmit = document.getElementById('authSubmitBtn');
-                
                 if (adminDoc.exists()) {
                     adminAccount = adminDoc.data();
                     authTitle.innerText = "Iniciar Sesión";
@@ -648,7 +708,7 @@
             const header = document.getElementById('individualHeader');
             const body = document.getElementById('individualBody');
 
-            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200">Asesor</th>`;
+            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200 bg-slate-50">Personal</th>`;
             DAYS.forEach((d, idx) => {
                 let dNum = new Date(baseDate);
                 dNum.setDate(dNum.getDate() + (week - 1) * 7 + idx);
