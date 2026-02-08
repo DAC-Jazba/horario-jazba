@@ -42,22 +42,33 @@
         .is-admin .admin-flex { display: flex !important; }
 
         #toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 12px;
-            background: #1e293b;
-            color: white;
-            font-weight: bold;
-            z-index: 200;
-            transform: translateY(100px);
-            transition: transform 0.3s ease;
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 12px 24px; border-radius: 12px;
+            background: #1e293b; color: white;
+            font-weight: bold; z-index: 200;
+            transform: translateY(100px); transition: transform 0.3s ease;
         }
         #toast.show { transform: translateY(0); }
+
+        /* Banner de actualización */
+        #update-banner {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: #2563eb; color: white; padding: 12px 24px;
+            border-radius: 99px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 500; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 12px; font-weight: bold;
+        }
+        #update-banner.visible { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans min-h-screen pb-10 transition-colors duration-300">
+
+    <!-- Banner de Notificación Global -->
+    <div id="update-banner">
+        <i data-lucide="bell-ring" class="w-5 h-5"></i>
+        <span>El administrador ha actualizado el horario</span>
+        <button onclick="location.reload()" class="bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-black uppercase">Actualizar Vista</button>
+    </div>
 
     <div id="app" class="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto opacity-0 transition-opacity duration-500">
         <!-- HEADER PRINCIPAL -->
@@ -82,7 +93,7 @@
                     <div class="flex gap-2">
                         <select id="scheduleVersionSelector" onchange="switchSchedule()" class="bg-white border-slate-200 rounded-lg text-xs font-bold p-1.5 shadow-sm outline-none"></select>
                         <button onclick="deleteCurrentVersion()" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar Versión"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        <button onclick="clearAllAssignments()" class="text-amber-600 hover:bg-amber-50 p-1.5 rounded-lg transition-colors" title="Limpiar Turnos de esta versión"><i data-lucide="eraser" class="w-4 h-4"></i></button>
+                        <button onclick="clearAllAssignments()" class="text-amber-600 hover:bg-amber-50 p-1.5 rounded-lg transition-colors" title="Limpiar Turnos"><i data-lucide="eraser" class="w-4 h-4"></i></button>
                     </div>
                 </div>
                 
@@ -110,14 +121,16 @@
                     </div>
                 </div>
 
-                <!-- FILTRO VISUAL LOCAL -->
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="relative min-w-[200px]">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="localSearch" oninput="renderIndividualView()" placeholder="Filtrar mi nombre..." class="pl-9 pr-4 py-2 w-full bg-white border border-slate-200 rounded-xl text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    <!-- FILTRO ASESOR (DESPLEGABLE) -->
+                    <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm min-w-[220px]">
+                        <i data-lucide="user-search" class="w-4 h-4 text-slate-400 ml-2"></i>
+                        <select id="localSearchSelect" onchange="renderIndividualView()" class="bg-transparent border-none text-sm font-bold p-1 outline-none flex-1">
+                            <option value="">TODOS LOS ASESORES</option>
+                        </select>
                     </div>
                     <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                        <span class="text-[10px] font-black text-slate-400 px-2 uppercase">Ver Semana:</span>
+                        <span class="text-[10px] font-black text-slate-400 px-2 uppercase tracking-tighter">Ver Semana:</span>
                         <select id="weekSelectorView" onchange="renderAll()" class="bg-transparent border-none text-sm font-bold p-1 outline-none"></select>
                     </div>
                 </div>
@@ -140,28 +153,24 @@
                     <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 uppercase tracking-tight">
                         <i data-lucide="settings" class="text-amber-500"></i> Ciclo Base de Tiendas
                     </h2>
-                    <!-- GESTIÓN DE DURACIÓN DEL CICLO (SOLO ADMIN) -->
                     <div class="admin-only flex items-center gap-2 bg-slate-200/50 p-1 rounded-xl">
                         <button onclick="changeCycleWeeks(-1)" class="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-red-50 text-red-500 shadow-sm transition-all"><i data-lucide="minus" class="w-4 h-4"></i></button>
                         <span id="cycleWeeksDisplay" class="px-3 font-black text-slate-700 text-sm">3 Semanas</span>
                         <button onclick="changeCycleWeeks(1)" class="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-green-50 text-green-500 shadow-sm transition-all"><i data-lucide="plus" class="w-4 h-4"></i></button>
-                        <span class="text-[9px] font-black text-slate-400 pr-2 uppercase">Duración</span>
                     </div>
                 </div>
-                <div id="editWeekTabs" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-                    <!-- Dinámico -->
-                </div>
+                <div id="editWeekTabs" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200"></div>
             </div>
             <div id="storesContainer" class="space-y-6"></div>
         </div>
     </div>
 
-    <!-- MODAL: LOGIN / REGISTRO -->
+    <!-- MODAL: LOGIN -->
     <div id="authModal" class="fixed inset-0 modal-overlay hidden z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden p-8 space-y-6">
             <div class="text-center">
                 <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="lock" class="text-blue-600 w-8 h-8"></i></div>
-                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Validando...</h3>
+                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Admin</h3>
                 <p class="text-slate-400 text-sm" id="authSubtitle">Seguridad DAC JAZBA</p>
             </div>
             <div class="space-y-4">
@@ -210,10 +219,11 @@
                     <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide"><i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio</label>
                 </div>
                 
+                <!-- REPLICACIÓN -->
                 <div id="replicationSection" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="doReplicate" onchange="toggleReplicationOptions()" class="w-4 h-4 accent-blue-600 rounded">
-                        <label for="doReplicate" class="font-bold text-blue-700 text-xs uppercase tracking-tight">Replicar este horario</label>
+                        <label for="doReplicate" class="font-bold text-blue-700 text-xs uppercase tracking-tight">Replicar en otros espacios</label>
                     </div>
                     <div id="replicationOptions" class="hidden space-y-3">
                         <div>
@@ -254,13 +264,12 @@
         </div>
     </div>
 
-    <!-- MODAL: GESTIÓN DE VERSIONES -->
+    <!-- MODAL: VERSIONES -->
     <div id="versionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-5">
             <h3 class="text-xl font-bold text-slate-800">Panel de Versiones</h3>
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Nombre del Horario</label>
-                <input type="text" id="newVersionName" placeholder="Ej: Horario Junio" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
+                <input type="text" id="newVersionName" placeholder="Nombre (ej. Horario Junio)" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="createNewVersion(true)" class="bg-blue-600 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Duplicar Actual</button>
                     <button onclick="createNewVersion(false)" class="bg-slate-800 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Crear Vacío</button>
@@ -270,7 +279,7 @@
         </div>
     </div>
 
-    <!-- MODALES PERSONAL / TIENDA -->
+    <!-- MODAL: PERSONAL -->
     <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
              <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
@@ -280,22 +289,20 @@
         </div>
     </div>
 
+    <!-- MODAL: TIENDAS -->
     <div id="storeModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
              <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Nueva Tienda</h3><button onclick="toggleModal('storeModal')"><i data-lucide="x"></i></button></div>
-             <input type="text" id="storeName" placeholder="Nombre" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
-             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir</button>
+             <input type="text" id="storeName" placeholder="Nombre Local" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
+             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Crear</button>
         </div>
     </div>
-
-    <div id="toast">Notificación</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CONFIG Y ESTADO ---
         const firebaseConfig = {
   apiKey: "AIzaSyCrIx2vVDC46s2Ndj4nJRJcvBIpeBaYwr0",
   authDomain: "horario-laboral-jazba.firebaseapp.com",
@@ -320,16 +327,14 @@
 
         const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-        // --- FUNCIONES EXPORTADAS ---
+        // --- FUNCIONES GLOBALES ---
 
         window.renderAll = () => {
             const active = schedules[currentScheduleName];
             if (!active) return;
-            
-            // Asegurar que exista el número de semanas del ciclo
             if (!active.weeksInCycle) active.weeksInCycle = 3;
 
-            populateWorkerSelects();
+            populateSearchSelect();
             renderIndividualView();
             renderStoreGrids();
             renderWorkerList();
@@ -381,7 +386,7 @@
 
         window.switchSchedule = () => {
             currentScheduleName = document.getElementById('scheduleVersionSelector').value;
-            currentEditWeek = 1; // Reset a semana 1 al cambiar versión
+            currentEditWeek = 1;
             window.renderAll();
         };
 
@@ -392,6 +397,7 @@
             const newDate = new Date(newDateStr + "T00:00:00");
             baseDate = newDate;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), { baseDate: baseDate.toISOString() }, { merge: true });
+            notifyChange(true);
         };
 
         window.changeCycleWeeks = async (inc) => {
@@ -407,21 +413,11 @@
         window.createNewVersion = async (duplicate) => {
             if (!auth.currentUser) return;
             const name = document.getElementById('newVersionName').value.trim();
-            if (!name || schedules[name]) return showToast("Nombre inválido.");
-            
-            let data;
-            if (duplicate) {
-                data = JSON.parse(JSON.stringify(schedules[currentScheduleName]));
-            } else {
-                data = {
-                    name: name,
-                    workers: schedules[currentScheduleName].workers || [],
-                    stores: schedules[currentScheduleName].stores || [],
-                    assignments: [],
-                    overrides: [],
-                    weeksInCycle: 3
-                };
-            }
+            if (!name || schedules[name]) return showToast("Nombre no disponible.");
+            let data = duplicate ? JSON.parse(JSON.stringify(schedules[currentScheduleName])) : {
+                name: name, workers: schedules[currentScheduleName].workers || [], stores: schedules[currentScheduleName].stores || [],
+                assignments: [], overrides: [], weeksInCycle: 3
+            };
             data.name = name;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data);
             currentScheduleName = name;
@@ -431,20 +427,19 @@
 
         window.deleteCurrentVersion = async () => {
             if (!auth.currentUser) return;
-            if (currentScheduleName === "Horario Principal") return showToast("Protegido.");
-            if (!confirm(`¿Eliminar permanentemente ${currentScheduleName}?`)) return;
+            if (currentScheduleName === "Horario Principal") return showToast("No se puede eliminar.");
+            if (!confirm(`¿Eliminar ${currentScheduleName}?`)) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName));
             currentScheduleName = "Horario Principal";
         };
 
         window.clearAllAssignments = async () => {
             if (!isAdmin || !auth.currentUser) return;
-            if (!confirm("¿Deseas borrar TODOS los turnos de esta versión?")) return;
+            if (!confirm("¿Borrar todos los turnos?")) return;
             const active = schedules[currentScheduleName];
             active.assignments = [];
             active.overrides = [];
             await saveScheduleToCloud(currentScheduleName, active);
-            showToast("Turnos limpiados.");
         };
 
         window.addWorker = async () => {
@@ -455,6 +450,17 @@
             active.workers.push({ id: Date.now(), name, color: document.getElementById('workerColor').value });
             document.getElementById('workerName').value = '';
             await saveScheduleToCloud(currentScheduleName, active);
+        };
+
+        window.editWorkerName = async (id) => {
+            if (!isAdmin) return;
+            const active = schedules[currentScheduleName];
+            const worker = active.workers.find(w => w.id === id);
+            const newName = prompt("Editar nombre del asesor:", worker.name);
+            if (newName && newName.trim() !== "") {
+                worker.name = newName.toUpperCase();
+                await saveScheduleToCloud(currentScheduleName, active);
+            }
         };
 
         window.deleteWorker = async (id) => {
@@ -473,6 +479,17 @@
             document.getElementById('storeName').value = '';
             toggleModal('storeModal');
             await saveScheduleToCloud(currentScheduleName, active);
+        };
+
+        window.editStoreName = async (id) => {
+            if (!isAdmin) return;
+            const active = schedules[currentScheduleName];
+            const store = active.stores.find(s => s.id === id);
+            const newName = prompt("Editar nombre de la tienda:", store.name);
+            if (newName && newName.trim() !== "") {
+                store.name = newName;
+                await saveScheduleToCloud(currentScheduleName, active);
+            }
         };
 
         window.deleteStore = async (id) => {
@@ -521,28 +538,20 @@
         window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
             if (!isAdmin) return;
             const active = schedules[currentScheduleName];
-            if(!active) return;
-            
             const target = { week: currentEditWeek, storeId, dayIdx, type, slotIdx, date, workerId };
             document.getElementById('assignTarget').value = JSON.stringify(target);
-            
             document.getElementById('isTemporary').checked = false;
             document.getElementById('untilDate').value = "";
             document.getElementById('doReplicate').checked = false;
-            
             window.toggleTempUI();
             window.toggleReplicationOptions();
-
             document.getElementById('replicationSection').classList.toggle('hidden', !!date);
 
-            let existing = null;
-            if (date) {
-                existing = active.overrides?.find(o => o.date === date && o.workerId == workerId);
-                document.getElementById('workerField').classList.add('hidden');
-            } else {
-                existing = active.assignments.find(a => a.week === target.week && a.storeId == storeId && a.dayIdx === dayIdx && a.type === type && a.slotIdx === slotIdx);
-                document.getElementById('workerField').classList.remove('hidden');
-            }
+            let existing = date 
+                ? active.overrides?.find(o => o.date === date && o.workerId == workerId)
+                : active.assignments.find(a => a.week === target.week && a.storeId == storeId && a.dayIdx === dayIdx && a.type === type && a.slotIdx === slotIdx);
+
+            document.getElementById('workerField').classList.toggle('hidden', !!date);
 
             if (existing) {
                 if(!date) document.getElementById('workerSelect').value = existing.workerId;
@@ -560,14 +569,12 @@
                 document.getElementById('isHighlighted').checked = false;
                 document.getElementById('deleteAssignmentBtn').classList.add('hidden');
             }
-            
-            document.getElementById('assignTitle').innerText = date ? `Turno Temporal: ${date}` : `Base: ${type} ${slotIdx+1}`;
+            document.getElementById('assignTitle').innerText = date ? `Temporal: ${date}` : `Base: ${type} ${slotIdx+1}`;
             window.toggleRestUI();
             toggleModal('assignModal');
         };
 
         window.saveAssignment = async () => {
-            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
             const isTemp = document.getElementById('isTemporary').checked;
@@ -575,14 +582,11 @@
             const untilDateStr = document.getElementById('untilDate').value;
             const workerId = target.date ? target.workerId : document.getElementById('workerSelect').value;
 
-            if (!workerId && !target.date) return showToast("Elige un asesor.");
+            if (!workerId && !target.date) return showToast("Selecciona asesor.");
 
             const shiftData = {
-                workerId: parseInt(workerId),
-                start: document.getElementById('startTime').value,
-                end: document.getElementById('endTime').value,
-                status: document.getElementById('specialStatus').value,
-                breakMinutes: document.getElementById('breakMinutes').value,
+                workerId: parseInt(workerId), start: document.getElementById('startTime').value, end: document.getElementById('endTime').value,
+                status: document.getElementById('specialStatus').value, breakMinutes: document.getElementById('breakMinutes').value,
                 highlighted: document.getElementById('isHighlighted').checked
             };
 
@@ -605,42 +609,33 @@
                 if (doReplicate) {
                     const selWeeks = Array.from(document.querySelectorAll('.rep-week:checked')).map(cb => parseInt(cb.value));
                     const selDays = Array.from(document.querySelectorAll('.rep-day:checked')).map(cb => parseInt(cb.value));
-                    if (selWeeks.length === 0 || selDays.length === 0) return showToast("Marca semanas y días.");
-                    selWeeks.forEach(w => {
-                        selDays.forEach(d => {
-                            active.assignments = active.assignments.filter(a => !(a.week === w && a.storeId == target.storeId && a.dayIdx === d && a.type === target.type && a.slotIdx === target.slotIdx));
-                            active.assignments.push({ week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, ...shiftData });
-                        });
-                    });
+                    selWeeks.forEach(w => selDays.forEach(d => {
+                        active.assignments = active.assignments.filter(a => !(a.week === w && a.storeId == target.storeId && a.dayIdx === d && a.type === target.type && a.slotIdx === target.slotIdx));
+                        active.assignments.push({ week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, ...shiftData });
+                    }));
                 } else {
                     active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
                     active.assignments.push({ ...target, ...shiftData });
                 }
             }
             await saveScheduleToCloud(currentScheduleName, active);
+            notifyChange(shiftData.highlighted);
             toggleModal('assignModal');
         };
 
         window.deleteAssignment = async () => {
-            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
-            if (target.date) {
-                active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == target.workerId));
-            } else {
-                active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
-            }
+            if (target.date) active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == target.workerId));
+            else active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
             await saveScheduleToCloud(currentScheduleName, active);
             toggleModal('assignModal');
         };
 
         window.toggleRestUI = () => {
             const s = document.getElementById('specialStatus').value;
-            const timeFields = document.getElementById('timeFields');
-            if (timeFields) {
-                timeFields.style.opacity = (s === 'Trabajo') ? "1" : "0.3";
-                timeFields.style.pointerEvents = (s === 'Trabajo') ? "auto" : "none";
-            }
+            const tf = document.getElementById('timeFields');
+            if (tf) { tf.style.opacity = (s === 'Trabajo') ? "1" : "0.3"; tf.style.pointerEvents = (s === 'Trabajo') ? "auto" : "none"; }
         };
 
         window.toggleTempUI = () => {
@@ -654,10 +649,9 @@
             window.renderAll();
         };
 
-        // --- FIRESTORE SYNC ---
+        // --- FIRESTORE ---
 
         async function checkAdminRegistration() {
-            if (!auth.currentUser) return;
             try {
                 const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
                 const authTitle = document.getElementById('authTitle');
@@ -675,27 +669,21 @@
             } catch (e) { console.error("Admin check failed", e); }
         }
 
+        async function notifyChange(isUrgent) {
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'update_notif'), { 
+                lastChange: Date.now(),
+                urgent: isUrgent
+            }, { merge: true });
+        }
+
         function startDataSync() {
             if (!auth.currentUser) return;
-
             const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             onSnapshot(schedulesCol, (snapshot) => {
                 snapshot.forEach(doc => { schedules[doc.id] = doc.data(); });
-                if (Object.keys(schedules).length === 0) {
-                    const initial = {
-                        name: "Horario Principal",
-                        workers: [{ id: 1, name: 'DANIEL', color: '#3b82f6' }],
-                        stores: [{ id: 1, name: 'Open', slots: { 'Apertura': 1, 'Cierre': 1 } }],
-                        assignments: [],
-                        overrides: [],
-                        weeksInCycle: 3
-                    };
-                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', 'Horario Principal'), initial);
-                } else {
-                    updateVersionSelector();
-                    window.renderAll();
-                }
-            }, (err) => showToast("Error de sincronización."));
+                updateVersionSelector();
+                window.renderAll();
+            });
 
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), (snap) => {
                 if (snap.exists() && snap.data().baseDate) {
@@ -703,7 +691,17 @@
                     document.getElementById('baseDate').valueAsDate = baseDate;
                     window.renderAll();
                 }
-            }, (err) => console.error("Error global config sync:", err));
+            });
+
+            // Escuchar notificaciones de cambio
+            let lastUpdateHandled = Date.now();
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'update_notif'), (snap) => {
+                if (snap.exists() && snap.data().lastChange > lastUpdateHandled) {
+                    if (!isAdmin) {
+                        document.getElementById('update-banner').classList.add('visible');
+                    }
+                }
+            });
         }
 
         async function saveScheduleToCloud(name, data) {
@@ -726,8 +724,7 @@
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
+            t.innerText = msg; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
@@ -779,6 +776,21 @@
             active.workers.forEach(w => s.innerHTML += `<option value="${w.id}">${w.name}</option>`);
         }
 
+        function populateSearchSelect() {
+            const s = document.getElementById('localSearchSelect');
+            const active = schedules[currentScheduleName];
+            if(!s || !active) return;
+            const currentVal = s.value;
+            s.innerHTML = '<option value="">TODOS LOS ASESORES</option>';
+            active.workers.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.name;
+                opt.textContent = w.name;
+                s.appendChild(opt);
+            });
+            s.value = currentVal;
+        }
+
         function renderIndividualView() {
             const weekSelector = document.getElementById('weekSelectorView');
             if(!weekSelector) return;
@@ -786,12 +798,12 @@
             const active = schedules[currentScheduleName];
             if(!active) return;
 
-            const filterText = document.getElementById('localSearch').value.toUpperCase();
+            const filterText = document.getElementById('localSearchSelect').value;
 
             const header = document.getElementById('individualHeader');
             const body = document.getElementById('individualBody');
 
-            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200 bg-slate-50">Personal</th>`;
+            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200 bg-slate-50">Asesor</th>`;
             DAYS.forEach((d, idx) => {
                 let dNum = new Date(baseDate);
                 dNum.setDate(dNum.getDate() + (week - 1) * 7 + idx);
@@ -801,8 +813,7 @@
 
             body.innerHTML = '';
             active.workers.forEach(worker => {
-                // FILTRO VISUAL LOCAL
-                if (filterText && !worker.name.includes(filterText)) return;
+                if (filterText && worker.name !== filterText) return;
 
                 const isSelected = selectedWorkerRowId === worker.id;
                 let row = `<tr class="${isSelected ? 'row-selected' : ''}">
@@ -819,11 +830,8 @@
                     const fullDate = dNum.toISOString().split('T')[0];
                     const baseWeeks = active.weeksInCycle || 3;
                     const baseWeek = ((week - 1) % baseWeeks) + 1;
-                    
                     let shifts = active.overrides?.filter(o => o.date === fullDate && o.workerId === worker.id);
-                    if (!shifts || shifts.length === 0) {
-                        shifts = active.assignments.filter(a => a.week === baseWeek && a.dayIdx === dIdx && a.workerId === worker.id);
-                    }
+                    if (!shifts || shifts.length === 0) shifts = active.assignments.filter(a => a.week === baseWeek && a.dayIdx === dIdx && a.workerId === worker.id);
 
                     row += `<td onclick="openAssignModal(null, ${dIdx}, null, 0, '${fullDate}', ${worker.id})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-white/50' : ''}">
                         <div class="flex flex-col gap-1">
@@ -837,7 +845,7 @@
                                         <div class="uppercase flex items-center gap-1 truncate"><i data-lucide="${s.status === 'Trabajo' ? 'map-pin' : 'clock'}" class="w-3 h-3"></i> ${s.status === 'Trabajo' ? (st?st.name:'Asignado') : s.status}</div>
                                         ${s.status === 'Trabajo' ? `<div class="text-blue-600 mt-1">${s.start}-${s.end}</div><div class="text-[8px] text-slate-400 mt-0.5">Receso: ${s.breakMinutes}m</div>` : ''}
                                     </div>`;
-                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4 font-black opacity-20 tracking-widest">---</div>`}
+                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4 opacity-30">---</div>`}
                         </div>
                     </td>`;
                 });
@@ -848,18 +856,16 @@
 
         function renderStoreGrids() {
             const container = document.getElementById('storesContainer');
-            if(!container) return;
-            container.innerHTML = '';
+            if(!container) return; container.innerHTML = '';
             const active = schedules[currentScheduleName];
             if(!active) return;
-
             active.stores.forEach(store => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm";
                 let rows = '';
                 ['Apertura', 'Cierre'].forEach(type => {
-                    const slotCount = store.slots[type] || 0;
-                    for (let i = 0; i < slotCount; i++) {
+                    const sc = store.slots[type] || 0;
+                    for (let i = 0; i < sc; i++) {
                         rows += `<tr class="border-b border-slate-100">
                             <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center uppercase text-slate-400">${type} ${i+1}</td>
                             ${DAYS.map((_, dIdx) => {
@@ -867,32 +873,15 @@
                                 const w = a ? active.workers.find(usr => usr.id == a.workerId) : null;
                                 let style = w ? `background: ${w.color}15; color: ${w.color}; border: 1.5px solid ${w.color}` : '';
                                 return `<td onclick="openAssignModal(${store.id}, ${dIdx}, '${type}', ${i})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default'} h-14 transition-all">
-                                    <div class="w-full h-full flex items-center justify-center rounded-xl text-[10px] font-bold" style="${style}">
-                                        ${w ? w.name : '<span class="text-slate-200 italic">...</span>'}
-                                    </div>
+                                    <div class="w-full h-full flex items-center justify-center rounded-xl text-[10px] font-bold" style="${style}">${w ? w.name : '<span class="text-slate-200 italic">...</span>'}</div>
                                 </td>`;
                             }).join('')}
                         </tr>`;
                     }
                 });
-                card.innerHTML = `
-                    <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
-                        <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span></div>
-                        <div class="admin-only flex gap-2">
-                            <button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Apertura</button>
-                            <button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
-                            <div class="w-px bg-slate-700 h-4 self-center mx-1"></div>
-                            <button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Cierre</button>
-                            <button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
-                            <button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse min-w-[1200px]">
-                            <thead class="bg-slate-50"><tr><th class="p-3 border-r w-24 text-[10px] font-black uppercase text-slate-400">Turno</th>${DAYS.map(d=>`<th class="p-3 border-r text-[10px] font-black uppercase text-slate-500">${d}</th>`).join('')}</tr></thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>`;
+                card.innerHTML = `<div class="bg-slate-800 text-white p-4 flex justify-between items-center"><div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span><button onclick="editStoreName(${store.id})" class="admin-only ml-2 p-1 hover:text-emerald-400"><i data-lucide="edit-2" class="w-3 h-3"></i></button></div>
+                <div class="admin-only flex gap-2"><button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Apertura</button><button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button><div class="w-px bg-slate-700 h-4 self-center mx-1"></div><button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Cierre</button><button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button><button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
+                <div class="overflow-x-auto"><table class="w-full border-collapse min-w-[1200px]"><thead class="bg-slate-50"><tr><th class="p-3 border-r w-24 text-[10px] font-black uppercase text-slate-400">Turno</th>${DAYS.map(d=>`<th class="p-3 border-r text-[10px] font-black uppercase text-slate-500">${d}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
                 container.appendChild(card);
             });
         }
@@ -904,30 +893,20 @@
             if(!active) return;
             list.innerHTML = '';
             active.workers.forEach(w => {
-                list.innerHTML += `<div class="flex items-center justify-between p-3 bg-slate-50 border rounded-xl shadow-sm"><div class="flex items-center gap-3"><span class="w-4 h-4 rounded-full" style="background:${w.color}"></span><span class="font-bold">${w.name}</span></div><button onclick="deleteWorker(${w.id})" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                list.innerHTML += `<div class="flex items-center justify-between p-3 bg-slate-50 border rounded-xl shadow-sm"><div class="flex items-center gap-3"><span class="w-4 h-4 rounded-full" style="background:${w.color}"></span><span class="font-bold">${w.name}</span><button onclick="editWorkerName(${w.id})" class="p-1 hover:text-blue-600"><i data-lucide="edit-2" class="w-3 h-3"></i></button></div><button onclick="deleteWorker(${w.id})" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             });
+            lucide.createIcons();
         }
 
-        // --- INICIALIZACIÓN ---
+        // --- INICIO ---
         window.addEventListener('load', async () => {
             initWeekSelector();
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                else await signInAnonymously(auth);
             } catch (e) { showToast("Error de conexión."); }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('app').style.opacity = "1";
-                    startDataSync();
-                    checkAdminRegistration();
-                }
-            });
+            onAuthStateChanged(auth, (user) => { if (user) { document.getElementById('app').style.opacity = "1"; startDataSync(); checkAdminRegistration(); } });
         });
-
     </script>
 </body>
 </html>
