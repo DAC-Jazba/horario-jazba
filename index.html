@@ -77,16 +77,17 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <div class="admin-only flex-col border-r border-slate-200 pr-3">
+                <div class="admin-only flex flex-col border-r border-slate-200 pr-3">
                     <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Versión Activa</label>
                     <div class="flex gap-2">
                         <select id="scheduleVersionSelector" onchange="switchSchedule()" class="bg-white border-slate-200 rounded-lg text-xs font-bold p-1.5 shadow-sm outline-none"></select>
                         <button onclick="deleteCurrentVersion()" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar Versión"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="clearAllAssignments()" class="text-amber-600 hover:bg-amber-50 p-1.5 rounded-lg transition-colors" title="Limpiar Turnos de esta versión"><i data-lucide="eraser" class="w-4 h-4"></i></button>
                     </div>
                 </div>
                 
                 <div class="admin-only flex gap-2">
-                    <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Gestionar Versiones"><i data-lucide="copy-plus" class="w-4 h-4"></i></button>
+                    <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Versiones"><i data-lucide="layers" class="w-4 h-4"></i></button>
                     <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="users" class="w-4 h-4"></i> Personal</button>
                     <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="store" class="w-4 h-4"></i> Tienda</button>
                 </div>
@@ -100,14 +101,25 @@
 
         <!-- CRONOGRAMA PRINCIPAL -->
         <section class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
                 <div class="flex items-center gap-3">
                     <div class="bg-blue-500 p-2 rounded-lg text-white shadow-inner"><i data-lucide="calendar" class="w-5 h-5"></i></div>
-                    <h2 class="text-lg font-bold text-slate-700 uppercase tracking-tight" id="viewTitle">Sincronizando...</h2>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-700 uppercase tracking-tight" id="viewTitle">Cargando...</h2>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase" id="cycleStatusText"></p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-[10px] font-black text-slate-400 uppercase">Ver Semana:</span>
-                    <select id="weekSelectorView" onchange="renderAll()" class="bg-white border-slate-200 rounded-lg text-sm font-bold p-2 shadow-sm outline-none"></select>
+
+                <!-- FILTRO VISUAL LOCAL -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative min-w-[200px]">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="localSearch" oninput="renderIndividualView()" placeholder="Filtrar mi nombre..." class="pl-9 pr-4 py-2 w-full bg-white border border-slate-200 rounded-xl text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-400 px-2 uppercase">Ver Semana:</span>
+                        <select id="weekSelectorView" onchange="renderAll()" class="bg-transparent border-none text-sm font-bold p-1 outline-none"></select>
+                    </div>
                 </div>
             </div>
             
@@ -124,33 +136,38 @@
         <!-- CONFIGURACIÓN BASE -->
         <div class="flex flex-col space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 uppercase tracking-tight">
-                    <i data-lucide="settings" class="text-amber-500"></i> Ciclo Base de Tiendas
-                </h2>
-                <div class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-                    <button onclick="changeEditWeek(1)" id="btnW1" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 1</button>
-                    <button onclick="changeEditWeek(2)" id="btnW2" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 2</button>
-                    <button onclick="changeEditWeek(3)" id="btnW3" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all">Semana 3</button>
+                <div class="flex items-center gap-4">
+                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 uppercase tracking-tight">
+                        <i data-lucide="settings" class="text-amber-500"></i> Ciclo Base de Tiendas
+                    </h2>
+                    <!-- GESTIÓN DE DURACIÓN DEL CICLO (SOLO ADMIN) -->
+                    <div class="admin-only flex items-center gap-2 bg-slate-200/50 p-1 rounded-xl">
+                        <button onclick="changeCycleWeeks(-1)" class="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-red-50 text-red-500 shadow-sm transition-all"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                        <span id="cycleWeeksDisplay" class="px-3 font-black text-slate-700 text-sm">3 Semanas</span>
+                        <button onclick="changeCycleWeeks(1)" class="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-green-50 text-green-500 shadow-sm transition-all"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                        <span class="text-[9px] font-black text-slate-400 pr-2 uppercase">Duración</span>
+                    </div>
+                </div>
+                <div id="editWeekTabs" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <!-- Dinámico -->
                 </div>
             </div>
             <div id="storesContainer" class="space-y-6"></div>
         </div>
     </div>
 
-    <!-- MODAL: LOGIN / REGISTRO ADMIN -->
+    <!-- MODAL: LOGIN / REGISTRO -->
     <div id="authModal" class="fixed inset-0 modal-overlay hidden z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden p-8 space-y-6">
             <div class="text-center">
-                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="lock" class="text-blue-600 w-8 h-8"></i>
-                </div>
-                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Cargando...</h3>
+                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="lock" class="text-blue-600 w-8 h-8"></i></div>
+                <h3 class="text-2xl font-black text-slate-800" id="authTitle">Validando...</h3>
                 <p class="text-slate-400 text-sm" id="authSubtitle">Seguridad DAC JAZBA</p>
             </div>
             <div class="space-y-4">
                 <input type="text" id="authUsername" placeholder="Usuario" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
                 <input type="password" id="authPassword" placeholder="Contraseña" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
-                <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Validar</button>
+                <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Entrar</button>
             </div>
             <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
         </div>
@@ -165,7 +182,7 @@
             </div>
             <div class="p-8 space-y-4">
                 <input type="hidden" id="assignTarget">
-                <div id="workerField">
+                <div id="workerField" class="admin-only">
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Asesor</label>
                     <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
                 </div>
@@ -193,7 +210,6 @@
                     <label for="isHighlighted" class="font-bold text-amber-700 cursor-pointer text-xs flex items-center gap-2 uppercase tracking-wide"><i data-lucide="highlighter" class="w-4 h-4"></i> Resaltar Cambio</label>
                 </div>
                 
-                <!-- SECCIÓN DE REPLICACIÓN (SOLO PARA BASE) -->
                 <div id="replicationSection" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="doReplicate" onchange="toggleReplicationOptions()" class="w-4 h-4 accent-blue-600 rounded">
@@ -202,11 +218,7 @@
                     <div id="replicationOptions" class="hidden space-y-3">
                         <div>
                             <p class="text-[9px] font-black text-blue-400 uppercase mb-2">Semanas:</p>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="1"> W1</label>
-                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="2"> W2</label>
-                                <label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="3"> W3</label>
-                            </div>
+                            <div id="repWeeksContainer" class="flex flex-wrap gap-3"></div>
                         </div>
                         <div>
                             <p class="text-[9px] font-black text-blue-400 uppercase mb-2">Días:</p>
@@ -242,21 +254,28 @@
         </div>
     </div>
 
-    <!-- MODALES GESTIÓN -->
+    <!-- MODAL: GESTIÓN DE VERSIONES -->
     <div id="versionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-4 text-center">
-            <h3 class="text-xl font-bold">Duplicar Horario</h3>
-            <input type="text" id="newVersionName" placeholder="Nombre (ej. Horario Mayo)" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
-            <button onclick="createNewVersion()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-xs uppercase">Crear Copia</button>
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-5">
+            <h3 class="text-xl font-bold text-slate-800">Panel de Versiones</h3>
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Nombre del Horario</label>
+                <input type="text" id="newVersionName" placeholder="Ej: Horario Junio" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="createNewVersion(true)" class="bg-blue-600 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Duplicar Actual</button>
+                    <button onclick="createNewVersion(false)" class="bg-slate-800 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Crear Vacío</button>
+                </div>
+            </div>
             <button onclick="toggleModal('versionModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
         </div>
     </div>
 
+    <!-- MODALES PERSONAL / TIENDA -->
     <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
-             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Gestionar Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
-             <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl border-2 border-slate-100"></div>
-             <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir Asesor</button>
+             <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
+             <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl"></div>
+             <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir</button>
              <div id="workerList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
         </div>
     </div>
@@ -264,8 +283,8 @@
     <div id="storeModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
              <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Nueva Tienda</h3><button onclick="toggleModal('storeModal')"><i data-lucide="x"></i></button></div>
-             <input type="text" id="storeName" placeholder="Nombre Local" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
-             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Crear</button>
+             <input type="text" id="storeName" placeholder="Nombre" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
+             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir</button>
         </div>
     </div>
 
@@ -301,17 +320,25 @@
 
         const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-        // --- EXPORTAR FUNCIONES AL GLOBAL ---
-        
+        // --- FUNCIONES EXPORTADAS ---
+
         window.renderAll = () => {
             const active = schedules[currentScheduleName];
             if (!active) return;
+            
+            // Asegurar que exista el número de semanas del ciclo
+            if (!active.weeksInCycle) active.weeksInCycle = 3;
+
             populateWorkerSelects();
             renderIndividualView();
             renderStoreGrids();
             renderWorkerList();
+            renderEditWeekTabs();
             lucide.createIcons();
+            
             document.getElementById('viewTitle').innerText = `${currentScheduleName}`;
+            document.getElementById('cycleWeeksDisplay').innerText = `${active.weeksInCycle} Semanas`;
+            document.getElementById('cycleStatusText').innerText = `Ciclo repetitivo cada ${active.weeksInCycle} semanas`;
         };
 
         window.toggleModal = (id) => {
@@ -347,43 +374,81 @@
                 if (user === adminAccount.user && pass === adminAccount.pass) {
                     executeLogin();
                 } else {
-                    showToast("Credenciales incorrectas.");
+                    showToast("Usuario o clave incorrectos.");
                 }
             }
         };
 
         window.switchSchedule = () => {
             currentScheduleName = document.getElementById('scheduleVersionSelector').value;
+            currentEditWeek = 1; // Reset a semana 1 al cambiar versión
             window.renderAll();
         };
 
         window.updateDates = async () => {
-            if (!isAdmin) return;
+            if (!isAdmin || !auth.currentUser) return;
             const newDateStr = document.getElementById('baseDate').value;
             if(!newDateStr) return;
             const newDate = new Date(newDateStr + "T00:00:00");
             baseDate = newDate;
-            await updateGlobalConfig({ baseDate: baseDate.toISOString() });
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), { baseDate: baseDate.toISOString() }, { merge: true });
         };
 
-        window.createNewVersion = async () => {
+        window.changeCycleWeeks = async (inc) => {
+            if (!isAdmin || !auth.currentUser) return;
+            const active = schedules[currentScheduleName];
+            const newVal = (active.weeksInCycle || 3) + inc;
+            if (newVal < 1 || newVal > 6) return showToast("Mínimo 1, Máximo 6 semanas.");
+            active.weeksInCycle = newVal;
+            if (currentEditWeek > newVal) currentEditWeek = newVal;
+            await saveScheduleToCloud(currentScheduleName, active);
+        };
+
+        window.createNewVersion = async (duplicate) => {
+            if (!auth.currentUser) return;
             const name = document.getElementById('newVersionName').value.trim();
-            if (!name || schedules[name]) return showToast("Nombre no válido.");
-            const copy = JSON.parse(JSON.stringify(schedules[currentScheduleName]));
-            copy.name = name;
-            await saveScheduleToCloud(name, copy);
+            if (!name || schedules[name]) return showToast("Nombre inválido.");
+            
+            let data;
+            if (duplicate) {
+                data = JSON.parse(JSON.stringify(schedules[currentScheduleName]));
+            } else {
+                data = {
+                    name: name,
+                    workers: schedules[currentScheduleName].workers || [],
+                    stores: schedules[currentScheduleName].stores || [],
+                    assignments: [],
+                    overrides: [],
+                    weeksInCycle: 3
+                };
+            }
+            data.name = name;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data);
             currentScheduleName = name;
+            currentEditWeek = 1;
             toggleModal('versionModal');
         };
 
         window.deleteCurrentVersion = async () => {
-            if (currentScheduleName === "Horario Principal") return showToast("Versión protegida.");
-            if (!confirm(`¿Eliminar la versión ${currentScheduleName}?`)) return;
+            if (!auth.currentUser) return;
+            if (currentScheduleName === "Horario Principal") return showToast("Protegido.");
+            if (!confirm(`¿Eliminar permanentemente ${currentScheduleName}?`)) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName));
             currentScheduleName = "Horario Principal";
         };
 
+        window.clearAllAssignments = async () => {
+            if (!isAdmin || !auth.currentUser) return;
+            if (!confirm("¿Deseas borrar TODOS los turnos de esta versión?")) return;
+            const active = schedules[currentScheduleName];
+            active.assignments = [];
+            active.overrides = [];
+            await saveScheduleToCloud(currentScheduleName, active);
+            showToast("Turnos limpiados.");
+        };
+
         window.addWorker = async () => {
+            if (!auth.currentUser) return;
             const name = document.getElementById('workerName').value.toUpperCase();
             if (!name) return;
             const active = schedules[currentScheduleName];
@@ -393,13 +458,14 @@
         };
 
         window.deleteWorker = async (id) => {
-            if (!confirm("¿Eliminar asesor?")) return;
+            if (!auth.currentUser || !confirm("¿Eliminar asesor?")) return;
             const active = schedules[currentScheduleName];
             active.workers = active.workers.filter(w => w.id !== id);
             await saveScheduleToCloud(currentScheduleName, active);
         };
 
         window.addStore = async () => {
+            if (!auth.currentUser) return;
             const n = document.getElementById('storeName').value;
             if(!n) return;
             const active = schedules[currentScheduleName];
@@ -410,13 +476,14 @@
         };
 
         window.deleteStore = async (id) => {
-            if(!confirm('¿Eliminar tienda?')) return;
+            if (!auth.currentUser || !confirm('¿Eliminar tienda?')) return;
             const active = schedules[currentScheduleName];
             active.stores = active.stores.filter(s => s.id !== id);
             await saveScheduleToCloud(currentScheduleName, active);
         };
 
         window.addSlot = async (id, type) => {
+            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const store = active.stores.find(s => s.id == id);
             store.slots[type]++;
@@ -424,6 +491,7 @@
         };
 
         window.removeSlot = async (id, type) => {
+            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const store = active.stores.find(s => s.id == id);
             if (store.slots[type] > 0) {
@@ -434,16 +502,20 @@
 
         window.changeEditWeek = (w) => {
             currentEditWeek = w;
-            [1, 2, 3].forEach(n => {
-                const btn = document.getElementById(`btnW${n}`);
-                if(btn) btn.className = n === w ? 'px-5 py-2.5 rounded-lg text-sm font-black bg-amber-500 text-white shadow-md' : 'px-5 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100';
-            });
             window.renderAll();
         };
 
         window.toggleReplicationOptions = () => {
             const isReplicating = document.getElementById('doReplicate').checked;
             document.getElementById('replicationOptions').classList.toggle('hidden', !isReplicating);
+            if (isReplicating) {
+                const active = schedules[currentScheduleName];
+                const container = document.getElementById('repWeeksContainer');
+                container.innerHTML = '';
+                for(let i = 1; i <= (active.weeksInCycle || 3); i++){
+                    container.innerHTML += `<label class="flex items-center gap-1 text-xs font-bold"><input type="checkbox" class="rep-week" value="${i}"> W${i}</label>`;
+                }
+            }
         };
 
         window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
@@ -457,12 +529,10 @@
             document.getElementById('isTemporary').checked = false;
             document.getElementById('untilDate').value = "";
             document.getElementById('doReplicate').checked = false;
-            document.querySelectorAll('.rep-week, .rep-day').forEach(cb => cb.checked = false);
             
-            toggleTempUI();
-            toggleReplicationOptions();
+            window.toggleTempUI();
+            window.toggleReplicationOptions();
 
-            // Ocultar replicación si es cambio temporal
             document.getElementById('replicationSection').classList.toggle('hidden', !!date);
 
             let existing = null;
@@ -492,11 +562,12 @@
             }
             
             document.getElementById('assignTitle').innerText = date ? `Turno Temporal: ${date}` : `Base: ${type} ${slotIdx+1}`;
-            toggleRestUI();
+            window.toggleRestUI();
             toggleModal('assignModal');
         };
 
         window.saveAssignment = async () => {
+            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
             const isTemp = document.getElementById('isTemporary').checked;
@@ -531,20 +602,14 @@
                     active.overrides.push({ ...shiftData, date: target.date });
                 }
             } else {
-                // Modo Base
                 if (doReplicate) {
                     const selWeeks = Array.from(document.querySelectorAll('.rep-week:checked')).map(cb => parseInt(cb.value));
                     const selDays = Array.from(document.querySelectorAll('.rep-day:checked')).map(cb => parseInt(cb.value));
-                    
-                    if (selWeeks.length === 0 || selDays.length === 0) return showToast("Marca semanas y días para replicar.");
-
+                    if (selWeeks.length === 0 || selDays.length === 0) return showToast("Marca semanas y días.");
                     selWeeks.forEach(w => {
                         selDays.forEach(d => {
                             active.assignments = active.assignments.filter(a => !(a.week === w && a.storeId == target.storeId && a.dayIdx === d && a.type === target.type && a.slotIdx === target.slotIdx));
-                            active.assignments.push({ 
-                                week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, 
-                                ...shiftData 
-                            });
+                            active.assignments.push({ week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, ...shiftData });
                         });
                     });
                 } else {
@@ -552,12 +617,12 @@
                     active.assignments.push({ ...target, ...shiftData });
                 }
             }
-            
             await saveScheduleToCloud(currentScheduleName, active);
             toggleModal('assignModal');
         };
 
         window.deleteAssignment = async () => {
+            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
             if (target.date) {
@@ -586,12 +651,13 @@
 
         window.selectWorkerRow = (id) => {
             selectedWorkerRowId = (selectedWorkerRowId === id) ? null : id;
-            renderIndividualView();
+            window.renderAll();
         };
 
         // --- FIRESTORE SYNC ---
 
         async function checkAdminRegistration() {
+            if (!auth.currentUser) return;
             try {
                 const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
                 const authTitle = document.getElementById('authTitle');
@@ -610,23 +676,26 @@
         }
 
         function startDataSync() {
+            if (!auth.currentUser) return;
+
             const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             onSnapshot(schedulesCol, (snapshot) => {
-                if (snapshot.empty) {
+                snapshot.forEach(doc => { schedules[doc.id] = doc.data(); });
+                if (Object.keys(schedules).length === 0) {
                     const initial = {
                         name: "Horario Principal",
                         workers: [{ id: 1, name: 'DANIEL', color: '#3b82f6' }],
                         stores: [{ id: 1, name: 'Open', slots: { 'Apertura': 1, 'Cierre': 1 } }],
                         assignments: [],
-                        overrides: []
+                        overrides: [],
+                        weeksInCycle: 3
                     };
-                    saveScheduleToCloud("Horario Principal", initial);
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', 'Horario Principal'), initial);
                 } else {
-                    snapshot.forEach(doc => { schedules[doc.id] = doc.data(); });
                     updateVersionSelector();
                     window.renderAll();
                 }
-            });
+            }, (err) => showToast("Error de sincronización."));
 
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), (snap) => {
                 if (snap.exists() && snap.data().baseDate) {
@@ -634,18 +703,13 @@
                     document.getElementById('baseDate').valueAsDate = baseDate;
                     window.renderAll();
                 }
-            });
+            }, (err) => console.error("Error global config sync:", err));
         }
 
         async function saveScheduleToCloud(name, data) {
             if (!auth.currentUser) return;
             try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data); } 
             catch (e) { showToast("Error al guardar."); }
-        }
-
-        async function updateGlobalConfig(data) {
-            if (!auth.currentUser) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'base_config'), data, { merge: true });
         }
 
         function executeLogin() {
@@ -657,7 +721,7 @@
             document.getElementById('loginBtn').innerText = "Cerrar Panel";
             toggleModal('authModal');
             window.renderAll();
-            showToast("Acceso concedido.");
+            showToast("Bienvenido.");
         }
 
         function showToast(msg) {
@@ -690,6 +754,23 @@
             });
         }
 
+        function renderEditWeekTabs() {
+            const container = document.getElementById('editWeekTabs');
+            if(!container) return;
+            container.innerHTML = '';
+            const active = schedules[currentScheduleName];
+            const max = active.weeksInCycle || 3;
+            for(let i = 1; i <= max; i++) {
+                const btn = document.createElement('button');
+                btn.onclick = () => window.changeEditWeek(i);
+                btn.className = (currentEditWeek === i) 
+                    ? 'px-5 py-2.5 rounded-lg text-sm font-black bg-amber-500 text-white shadow-md' 
+                    : 'px-5 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100';
+                btn.innerText = `Semana ${i}`;
+                container.appendChild(btn);
+            }
+        }
+
         function populateWorkerSelects() {
             const s = document.getElementById('workerSelect');
             if(!s) return;
@@ -705,6 +786,8 @@
             const active = schedules[currentScheduleName];
             if(!active) return;
 
+            const filterText = document.getElementById('localSearch').value.toUpperCase();
+
             const header = document.getElementById('individualHeader');
             const body = document.getElementById('individualBody');
 
@@ -718,6 +801,9 @@
 
             body.innerHTML = '';
             active.workers.forEach(worker => {
+                // FILTRO VISUAL LOCAL
+                if (filterText && !worker.name.includes(filterText)) return;
+
                 const isSelected = selectedWorkerRowId === worker.id;
                 let row = `<tr class="${isSelected ? 'row-selected' : ''}">
                     <td onclick="selectWorkerRow(${worker.id})" class="p-4 font-black sticky-col border-r border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
@@ -731,7 +817,8 @@
                     let dNum = new Date(baseDate);
                     dNum.setDate(dNum.getDate() + (week - 1) * 7 + dIdx);
                     const fullDate = dNum.toISOString().split('T')[0];
-                    const baseWeek = ((week - 1) % 3) + 1;
+                    const baseWeeks = active.weeksInCycle || 3;
+                    const baseWeek = ((week - 1) % baseWeeks) + 1;
                     
                     let shifts = active.overrides?.filter(o => o.date === fullDate && o.workerId === worker.id);
                     if (!shifts || shifts.length === 0) {
@@ -750,12 +837,13 @@
                                         <div class="uppercase flex items-center gap-1 truncate"><i data-lucide="${s.status === 'Trabajo' ? 'map-pin' : 'clock'}" class="w-3 h-3"></i> ${s.status === 'Trabajo' ? (st?st.name:'Asignado') : s.status}</div>
                                         ${s.status === 'Trabajo' ? `<div class="text-blue-600 mt-1">${s.start}-${s.end}</div><div class="text-[8px] text-slate-400 mt-0.5">Receso: ${s.breakMinutes}m</div>` : ''}
                                     </div>`;
-                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4">Libre</div>`}
+                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4 font-black opacity-20 tracking-widest">---</div>`}
                         </div>
                     </td>`;
                 });
                 body.innerHTML += row + `</tr>`;
             });
+            lucide.createIcons();
         }
 
         function renderStoreGrids() {
@@ -770,9 +858,10 @@
                 card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm";
                 let rows = '';
                 ['Apertura', 'Cierre'].forEach(type => {
-                    for (let i = 0; i < store.slots[type]; i++) {
+                    const slotCount = store.slots[type] || 0;
+                    for (let i = 0; i < slotCount; i++) {
                         rows += `<tr class="border-b border-slate-100">
-                            <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center">${type} ${i+1}</td>
+                            <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center uppercase text-slate-400">${type} ${i+1}</td>
                             ${DAYS.map((_, dIdx) => {
                                 const a = active.assignments.find(as => as.week === currentEditWeek && as.storeId == store.id && as.dayIdx === dIdx && as.type === type && as.slotIdx === i);
                                 const w = a ? active.workers.find(usr => usr.id == a.workerId) : null;
@@ -790,10 +879,10 @@
                     <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
                         <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span></div>
                         <div class="admin-only flex gap-2">
-                            <button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold">+ APER</button>
+                            <button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Apertura</button>
                             <button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
                             <div class="w-px bg-slate-700 h-4 self-center mx-1"></div>
-                            <button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold">+ CIER</button>
+                            <button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Cierre</button>
                             <button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button>
                             <button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
