@@ -97,8 +97,8 @@
                 
                 <div class="admin-only flex gap-2">
                     <button onclick="toggleModal('versionModal')" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 transition-all" title="Versiones"><i data-lucide="layers" class="w-4 h-4"></i></button>
-                    <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="users" class="w-4 h-4"></i> Personal</button>
-                    <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="store" class="w-4 h-4"></i> Tienda</button>
+                    <button onclick="toggleModal('workerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="users" class="w-4 h-4"></i> Asesores</button>
+                    <button onclick="toggleModal('storeModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-sm"><i data-lucide="store" class="w-4 h-4"></i> Tiendas</button>
                 </div>
 
                 <div class="flex flex-col pl-3 border-l border-slate-200">
@@ -174,7 +174,7 @@
                 <input type="password" id="authPassword" placeholder="Contraseña" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500">
                 <button onclick="handleAuthAction()" id="authSubmitBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 uppercase tracking-widest text-sm">Entrar</button>
             </div>
-            <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cerrar</button>
+            <button onclick="toggleModal('authModal')" class="w-full text-slate-400 text-xs font-bold uppercase py-2 text-center">Cerrar</button>
         </div>
     </div>
 
@@ -193,7 +193,7 @@
                     <select id="workerSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
                 </div>
 
-                <div>
+                <div id="storeField">
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Tienda / Local</label>
                     <select id="storeSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-3 font-bold outline-none focus:border-blue-500"></select>
                 </div>
@@ -227,7 +227,7 @@
                 <div id="replicationSection" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="doReplicate" onchange="toggleReplicationOptions()" class="w-4 h-4 accent-blue-600 rounded">
-                        <label for="doReplicate" class="font-bold text-blue-700 text-xs uppercase tracking-tight">Replicar en otros días</label>
+                        <label for="doReplicate" class="font-bold text-blue-700 text-xs uppercase tracking-tight">Replicar horario</label>
                     </div>
                     <div id="replicationOptions" class="hidden space-y-3">
                         <div id="repWeeksContainer" class="flex flex-wrap gap-2"></div>
@@ -246,10 +246,9 @@
                 <div id="tempSection" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="isTemporary" onchange="toggleTempUI()" class="w-4 h-4 accent-slate-600 rounded">
-                        <label for="isTemporary" class="font-bold text-slate-700 text-xs uppercase tracking-tight tracking-tighter">¿Es un cambio temporal?</label>
+                        <label for="isTemporary" class="font-bold text-slate-700 text-xs uppercase tracking-tight tracking-tighter">¿Cambio temporal por fecha?</label>
                     </div>
                     <div id="tempDateContainer" class="hidden">
-                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Válido hasta:</label>
                         <input type="date" id="untilDate" class="w-full border-slate-200 rounded-lg p-2 font-bold text-xs">
                     </div>
                 </div>
@@ -265,11 +264,11 @@
     <!-- MODALES GESTIÓN -->
     <div id="versionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 space-y-5 text-center">
-            <h3 class="text-xl font-bold text-slate-800 uppercase tracking-tighter">Versiones de Horario</h3>
-            <input type="text" id="newVersionName" placeholder="Nombre" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
+            <h3 class="text-xl font-bold text-slate-800 uppercase tracking-tighter">Panel de Versiones</h3>
+            <input type="text" id="newVersionName" placeholder="Nombre" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold outline-none">
             <div class="grid grid-cols-2 gap-2">
                 <button onclick="createNewVersion(true)" class="bg-blue-600 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Duplicar</button>
-                <button onclick="createNewVersion(false)" class="bg-slate-800 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Vacío</button>
+                <button onclick="createNewVersion(false)" class="bg-slate-800 text-white py-3 rounded-xl font-bold text-[10px] uppercase">Nuevo Vacío</button>
             </div>
             <button onclick="toggleModal('versionModal')" class="text-slate-400 text-xs font-bold uppercase">Cerrar</button>
         </div>
@@ -278,8 +277,8 @@
     <div id="workerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 space-y-4">
              <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Asesores</h3><button onclick="toggleModal('workerModal')"><i data-lucide="x"></i></button></div>
-             <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl"></div>
-             <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir</button>
+             <div class="flex gap-2"><input type="text" id="workerName" placeholder="Nombre" class="flex-1 border-2 border-slate-100 rounded-xl p-3 font-bold uppercase"><input type="color" id="workerColor" value="#3b82f6" class="w-12 h-12 rounded-xl"></div>
+             <button onclick="addWorker()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Registrar</button>
              <div id="workerList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
         </div>
     </div>
@@ -288,7 +287,7 @@
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
              <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Nueva Tienda</h3><button onclick="toggleModal('storeModal')"><i data-lucide="x"></i></button></div>
              <input type="text" id="storeName" placeholder="Nombre Local" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
-             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Crear</button>
+             <button onclick="addStore()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase text-xs">Añadir</button>
         </div>
     </div>
 
@@ -407,7 +406,7 @@
         window.createNewVersion = async (duplicate) => {
             if (!auth.currentUser) return;
             const name = document.getElementById('newVersionName').value.trim();
-            if (!name || schedules[name]) return showToast("Nombre no válido.");
+            if (!name || schedules[name]) return showToast("Nombre no disponible.");
             let data = duplicate ? JSON.parse(JSON.stringify(schedules[currentScheduleName])) : {
                 name: name, workers: schedules[currentScheduleName].workers || [], stores: schedules[currentScheduleName].stores || [],
                 assignments: [], overrides: [], weeksInCycle: 3
@@ -422,18 +421,19 @@
         window.deleteCurrentVersion = async () => {
             if (!auth.currentUser) return;
             if (currentScheduleName === "Horario Principal") return showToast("No se puede eliminar.");
-            if (!confirm(`¿Eliminar ${currentScheduleName}?`)) return;
+            if (!confirm(`¿Eliminar permanentemente ${currentScheduleName}?`)) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName));
             currentScheduleName = "Horario Principal";
         };
 
         window.clearAllAssignments = async () => {
             if (!isAdmin || !auth.currentUser) return;
-            if (!confirm("¿Borrar todos los turnos?")) return;
+            if (!confirm("¿Borrar todos los turnos actuales?")) return;
             const active = schedules[currentScheduleName];
             active.assignments = [];
             active.overrides = [];
-            await saveScheduleToCloud(currentScheduleName, active);
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', currentScheduleName), active);
+            showToast("Horario limpiado.");
         };
 
         window.addWorker = async () => {
@@ -450,7 +450,7 @@
             if (!isAdmin) return;
             const active = schedules[currentScheduleName];
             const worker = active.workers.find(w => w.id === id);
-            const newName = prompt("Nuevo nombre:", worker.name);
+            const newName = prompt("Editar nombre:", worker.name);
             if (newName && newName.trim() !== "") {
                 worker.name = newName.toUpperCase();
                 await saveScheduleToCloud(currentScheduleName, active);
@@ -529,7 +529,7 @@
             }
         };
 
-        window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null) => {
+        window.openAssignModal = (storeId, dayIdx, type, slotIdx, date = null, workerId = null, shiftId = null) => {
             if (!isAdmin) return;
             const active = schedules[currentScheduleName];
             if(!active) return;
@@ -537,7 +537,7 @@
             populateAdvisorDropdown();
             populateStoreDropdown();
 
-            const target = { week: currentEditWeek, storeId, dayIdx, type, slotIdx, date, workerId };
+            const target = { week: currentEditWeek, storeId, dayIdx, type, slotIdx, date, workerId, shiftId };
             document.getElementById('assignTarget').value = JSON.stringify(target);
             
             document.getElementById('isTemporary').checked = false;
@@ -547,9 +547,14 @@
             window.toggleReplicationOptions();
             document.getElementById('replicationSection').classList.toggle('hidden', !!date);
 
-            let existing = date 
-                ? active.overrides?.find(o => o.date === date && o.workerId == workerId)
-                : active.assignments.find(a => a.week === target.week && a.storeId == storeId && a.dayIdx === dayIdx && a.type === type && a.slotIdx === slotIdx);
+            let existing = null;
+            if (date) {
+                if (shiftId && shiftId !== 'null' && shiftId !== '') {
+                    existing = active.overrides?.find(o => o.id === shiftId);
+                }
+            } else {
+                existing = active.assignments.find(a => a.week === target.week && a.storeId == storeId && a.dayIdx === dayIdx && a.type === type && a.slotIdx === slotIdx);
+            }
 
             if (existing) {
                 document.getElementById('workerSelect').value = existing.workerId;
@@ -575,7 +580,6 @@
         };
 
         window.saveAssignment = async () => {
-            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
             const isTemp = document.getElementById('isTemporary').checked;
@@ -587,6 +591,7 @@
             if (!workerId) return showToast("Selecciona asesor.");
 
             const shiftData = {
+                id: target.shiftId && target.shiftId !== 'null' ? target.shiftId : 's-' + Date.now() + Math.random().toString(36).substr(2, 5),
                 workerId: parseInt(workerId), 
                 storeId: storeId ? parseInt(storeId) : (target.storeId ? parseInt(target.storeId) : null),
                 start: document.getElementById('startTime').value, 
@@ -598,18 +603,18 @@
 
             if (target.date || isTemp) {
                 if (!active.overrides) active.overrides = [];
+                const dateKey = target.date || baseDate.toISOString().split('T')[0];
+                
                 if (isTemp && untilDateStr) {
-                    let curr = new Date((target.date || baseDate.toISOString().split('T')[0]) + "T00:00:00");
+                    let curr = new Date(dateKey + "T00:00:00");
                     let limit = new Date(untilDateStr + "T00:00:00");
                     while (curr <= limit) {
                         const dStr = curr.toISOString().split('T')[0];
-                        active.overrides = active.overrides.filter(o => !(o.date === dStr && o.workerId == workerId));
-                        active.overrides.push({ ...shiftData, date: dStr });
+                        await processSingleDateOverride(active, dStr, workerId, target.shiftId, shiftData);
                         curr.setDate(curr.getDate() + 1);
                     }
-                } else if (target.date) {
-                    active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == workerId));
-                    active.overrides.push({ ...shiftData, date: target.date });
+                } else {
+                    await processSingleDateOverride(active, dateKey, workerId, target.shiftId, shiftData);
                 }
             } else {
                 if (doReplicate) {
@@ -617,11 +622,11 @@
                     const selDays = Array.from(document.querySelectorAll('.rep-day:checked')).map(cb => parseInt(cb.value));
                     selWeeks.forEach(w => selDays.forEach(d => {
                         active.assignments = active.assignments.filter(a => !(a.week === w && a.storeId == target.storeId && a.dayIdx === d && a.type === target.type && a.slotIdx === target.slotIdx));
-                        active.assignments.push({ week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx, ...shiftData });
+                        active.assignments.push({ ...shiftData, week: w, storeId: target.storeId, dayIdx: d, type: target.type, slotIdx: target.slotIdx });
                     }));
                 } else {
                     active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
-                    active.assignments.push({ ...target, ...shiftData });
+                    active.assignments.push({ ...shiftData, week: target.week, storeId: target.storeId, dayIdx: target.dayIdx, type: target.type, slotIdx: target.slotIdx });
                 }
             }
             await saveScheduleToCloud(currentScheduleName, active);
@@ -629,17 +634,82 @@
             toggleModal('assignModal');
         };
 
+        // Función interna para manejar la lógica de "doble turno" al guardar
+        async function processSingleDateOverride(active, dStr, workerId, existingShiftId, newShiftData) {
+            // Ver si ya hay overrides para este asesor en este día
+            const dayOverrides = active.overrides.filter(o => o.date === dStr && o.workerId == workerId);
+            
+            if (dayOverrides.length === 0) {
+                // No hay nada manual ese día. Clonamos los turnos BASE de ese día para protegerlos
+                const dObj = new Date(dStr + "T00:00:00");
+                const dIdx = (dObj.getDay() + 6) % 7;
+                const daysDiff = Math.floor((dObj - baseDate) / (1000 * 60 * 60 * 24));
+                const weekNum = Math.floor(daysDiff / 7) + 1;
+                const bWeeks = active.weeksInCycle || 3;
+                const bWeek = ((weekNum - 1) % bWeeks) + 1;
+                
+                const baseShifts = active.assignments.filter(a => a.week === bWeek && a.dayIdx === dIdx && a.workerId == workerId);
+                
+                baseShifts.forEach(bs => {
+                    // Si el turno base es el que estamos editando, guardamos el nuevo. Si no, clonamos el viejo.
+                    if (bs.id === existingShiftId) {
+                        active.overrides.push({ ...newShiftData, date: dStr });
+                    } else {
+                        active.overrides.push({ ...bs, date: dStr, id: 'ov-' + bs.id + '-' + dStr });
+                    }
+                });
+
+                // Si no hay turnos base tampoco, simplemente añadimos el nuevo
+                if (baseShifts.length === 0) {
+                    active.overrides.push({ ...newShiftData, date: dStr });
+                }
+            } else {
+                // Ya existen overrides. Actualizamos solo el ID que corresponde
+                active.overrides = active.overrides.filter(o => !(o.date === dStr && o.workerId == workerId && o.id === existingShiftId));
+                active.overrides.push({ ...newShiftData, date: dStr });
+            }
+        }
+
         window.deleteAssignment = async () => {
-            if (!auth.currentUser) return;
             const active = schedules[currentScheduleName];
             const target = JSON.parse(document.getElementById('assignTarget').value);
+            
             if (target.date) {
-                active.overrides = active.overrides.filter(o => !(o.date === target.date && o.workerId == target.workerId));
+                if (!active.overrides) active.overrides = [];
+                const dayOverrides = active.overrides.filter(o => o.date === target.date && o.workerId == target.workerId);
+
+                if (dayOverrides.length === 0) {
+                    // Borrando un turno que viene de la base. Debemos clonar los hermanos y dejar este fuera.
+                    const dObj = new Date(target.date + "T00:00:00");
+                    const dIdx = (dObj.getDay() + 6) % 7;
+                    const daysDiff = Math.floor((dObj - baseDate) / (1000 * 60 * 60 * 24));
+                    const weekNum = Math.floor(daysDiff / 7) + 1;
+                    const bWeek = ((weekNum - 1) % (active.weeksInCycle || 3)) + 1;
+                    const baseShifts = active.assignments.filter(a => a.week === bWeek && a.dayIdx === dIdx && a.workerId == target.workerId);
+
+                    baseShifts.forEach(bs => {
+                        if (bs.id !== target.shiftId) {
+                            active.overrides.push({ ...bs, date: target.date, id: 'ov-' + bs.id + '-' + target.date });
+                        }
+                    });
+
+                    // Si al borrarlo no quedan más turnos, marcamos como Libre
+                    if (baseShifts.length <= 1) {
+                         active.overrides.push({ id: 'ex-' + Date.now(), date: target.date, workerId: target.workerId, status: 'Libre' });
+                    }
+                } else {
+                    // Ya existían overrides. Borramos solo el específico.
+                    active.overrides = active.overrides.filter(o => o.id !== target.shiftId);
+                    // Si queda vacío el día, marcar libre para que no vuelva la base
+                    const remaining = active.overrides.filter(o => o.date === target.date && o.workerId == target.workerId);
+                    if (remaining.length === 0) {
+                        active.overrides.push({ id: 'ex-' + Date.now(), date: target.date, workerId: target.workerId, status: 'Libre' });
+                    }
+                }
             } else {
-                active.assignments = active.assignments.filter(a => !(a.week === target.week && a.storeId == target.storeId && a.dayIdx === target.dayIdx && a.type === target.type && a.slotIdx === target.slotIdx));
+                active.assignments = active.assignments.filter(a => a.id !== target.shiftId);
             }
             await saveScheduleToCloud(currentScheduleName, active);
-            notifyChange(false);
             toggleModal('assignModal');
         };
 
@@ -660,37 +730,15 @@
             window.renderAll();
         };
 
-        // --- FIRESTORE SYNC ---
-
-        async function checkAdminRegistration() {
-            try {
-                const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
-                const authTitle = document.getElementById('authTitle');
-                const authSubmit = document.getElementById('authSubmitBtn');
-                if (adminDoc.exists()) {
-                    adminAccount = adminDoc.data();
-                    authTitle.innerText = "Panel Admin";
-                    authSubmit.innerText = "Entrar";
-                } else {
-                    authTitle.innerText = "Registrar Admin";
-                    authSubmit.innerText = "Crear Maestro";
-                }
-                document.getElementById('authUsername').value = "";
-                document.getElementById('authPassword').value = "";
-            } catch (e) { console.error("Admin check failed", e); }
-        }
-
+        // --- FIRESTORE ---
         async function notifyChange(isUrgent) {
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'update_notif'), { 
-                lastChange: Date.now(),
-                urgent: isUrgent
+                lastChange: Date.now(), urgent: isUrgent
             }, { merge: true });
         }
 
         function startDataSync() {
-            if (!auth.currentUser) return;
-            const schedulesCol = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
-            onSnapshot(schedulesCol, (snapshot) => {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'schedules'), (snapshot) => {
                 snapshot.forEach(doc => { schedules[doc.id] = doc.data(); });
                 updateVersionSelector();
                 window.renderAll();
@@ -704,19 +752,15 @@
                 }
             });
 
-            let firstSync = true;
+            let initial = true;
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'globals', 'update_notif'), (snap) => {
-                if (firstSync) { firstSync = false; return; }
-                if (snap.exists()) {
-                    if (!isAdmin) document.getElementById('update-notif').classList.add('visible');
-                }
+                if (initial) { initial = false; return; }
+                if (snap.exists() && !isAdmin) document.getElementById('update-notif').classList.add('visible');
             });
         }
 
         async function saveScheduleToCloud(name, data) {
-            if (!auth.currentUser) return;
-            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data); } 
-            catch (e) { showToast("Error al guardar."); }
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', name), data);
         }
 
         function executeLogin() {
@@ -728,7 +772,7 @@
             document.getElementById('loginBtn').innerText = "Cerrar Panel";
             toggleModal('authModal');
             window.renderAll();
-            showToast("Bienvenido Admin.");
+            showToast("Acceso Admin.");
         }
 
         function showToast(msg) {
@@ -762,8 +806,7 @@
 
         function renderEditWeekTabs() {
             const container = document.getElementById('editWeekTabs');
-            if(!container) return;
-            container.innerHTML = '';
+            if(!container) return; container.innerHTML = '';
             const active = schedules[currentScheduleName];
             const max = active.weeksInCycle || 3;
             for(let i = 1; i <= max; i++) {
@@ -781,11 +824,10 @@
             const s = document.getElementById('workerSelect');
             if(!s) return;
             const active = schedules[currentScheduleName];
-            s.innerHTML = '<option value="">(Seleccionar Asesor)</option>';
+            s.innerHTML = '<option value="">(Asesor)</option>';
             active.workers.forEach(w => {
                 const opt = document.createElement('option');
-                opt.value = w.id;
-                opt.textContent = w.name;
+                opt.value = w.id; opt.textContent = w.name;
                 s.appendChild(opt);
             });
         }
@@ -794,11 +836,10 @@
             const s = document.getElementById('storeSelect');
             if(!s) return;
             const active = schedules[currentScheduleName];
-            s.innerHTML = '<option value="">(Seleccionar Tienda)</option>';
+            s.innerHTML = '<option value="">(Tienda)</option>';
             active.stores.forEach(st => {
                 const opt = document.createElement('option');
-                opt.value = st.id;
-                opt.textContent = st.name;
+                opt.value = st.id; opt.textContent = st.name;
                 s.appendChild(opt);
             });
         }
@@ -811,8 +852,7 @@
             s.innerHTML = '<option value="">TODOS LOS ASESORES</option>';
             active.workers.forEach(w => {
                 const opt = document.createElement('option');
-                opt.value = w.name;
-                opt.textContent = w.name;
+                opt.value = w.name; opt.textContent = w.name;
                 s.appendChild(opt);
             });
             s.value = currentVal;
@@ -820,35 +860,29 @@
 
         function renderIndividualView() {
             const weekSelector = document.getElementById('weekSelectorView');
-            if(!weekSelector) return;
             const week = parseInt(weekSelector.value) || 1;
             const active = schedules[currentScheduleName];
             if(!active) return;
 
             const filterText = document.getElementById('localSearchSelect').value;
-
             const header = document.getElementById('individualHeader');
             const body = document.getElementById('individualBody');
 
-            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200 bg-slate-50">Personal</th>`;
+            header.innerHTML = `<th class="p-4 sticky-col z-30 w-52 border-r border-slate-200 bg-slate-50 uppercase text-[10px]">Personal</th>`;
             DAYS.forEach((d, idx) => {
                 let dNum = new Date(baseDate);
                 dNum.setDate(dNum.getDate() + (week - 1) * 7 + idx);
                 const displayDate = dNum.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-                header.innerHTML += `<th class="p-4 text-center border-r border-slate-200 min-w-[180px]"><div class="flex flex-col"><span class="text-blue-600 font-black text-xs">${d}</span><span class="text-slate-600 font-black text-xl leading-none mt-1">${displayDate}</span></div></th>`;
+                header.innerHTML += `<th class="p-4 text-center border-r border-slate-200 min-w-[180px]"><div class="flex flex-col"><span class="text-blue-600 font-black text-xs">${d}</span><span class="text-slate-800 font-black text-2xl leading-none mt-2">${displayDate}</span></div></th>`;
             });
 
             body.innerHTML = '';
             active.workers.forEach(worker => {
                 if (filterText && worker.name !== filterText) return;
-
                 const isSelected = selectedWorkerRowId === worker.id;
                 let row = `<tr class="${isSelected ? 'row-selected' : ''}">
                     <td onclick="selectWorkerRow(${worker.id})" class="p-4 font-black sticky-col border-r border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <span class="w-2 h-8 rounded-full" style="background: ${worker.color}"></span>
-                            <span class="text-slate-700">${worker.name}</span>
-                        </div>
+                        <div class="flex items-center gap-3"><span class="w-2 h-8 rounded-full" style="background: ${worker.color}"></span><span class="text-slate-700">${worker.name}</span></div>
                     </td>`;
                 
                 DAYS.forEach((_, dIdx) => {
@@ -858,29 +892,31 @@
                     const baseWeeks = active.weeksInCycle || 3;
                     const baseWeek = ((week - 1) % baseWeeks) + 1;
                     
-                    let shifts = active.overrides?.filter(o => o.date === fullDate && o.workerId === worker.id);
-                    if (!shifts || shifts.length === 0) {
+                    let shifts = active.overrides?.filter(o => o.date === fullDate && o.workerId === worker.id && o.status !== 'Libre');
+                    if (!active.overrides?.some(o => o.date === fullDate && o.workerId === worker.id)) {
                         shifts = active.assignments.filter(a => a.week === baseWeek && a.dayIdx === dIdx && a.workerId === worker.id);
                     }
 
-                    row += `<td onclick="openAssignModal(null, ${dIdx}, null, 0, '${fullDate}', ${worker.id})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-white/20' : ''}">
+                    row += `<td class="p-2 border-r border-slate-200">
                         <div class="flex flex-col gap-1">
-                            ${shifts.length > 0 ? shifts.map(s => {
+                            ${shifts && shifts.length > 0 ? shifts.map(s => {
                                 const st = active.stores.find(tienda => tienda.id == s.storeId);
                                 let colorClass = "bg-slate-50 border-slate-200 text-slate-700";
                                 if(s.status === 'Descanso') colorClass = "bg-amber-100 border-amber-300 text-amber-700";
                                 else if(s.status === 'Vacaciones') colorClass = "bg-emerald-100 border-emerald-300 text-emerald-700";
                                 else if(s.status === 'Permiso') colorClass = "bg-purple-100 border-purple-300 text-purple-700";
-                                return `<div class="text-[10px] p-2 rounded-lg border font-bold ${colorClass} ${s.highlighted ? 'highlight-cell' : ''}">
-                                        <div class="uppercase flex items-center gap-1 truncate"><i data-lucide="${s.status === 'Trabajo' ? 'map-pin' : 'info'}" class="w-3 h-3"></i> ${s.status === 'Trabajo' ? (st?st.name:'Asignado') : s.status}</div>
-                                        ${s.status === 'Trabajo' ? `<div class="text-blue-600 mt-1">${s.start}-${s.end}</div><div class="text-[8px] text-slate-400 mt-0.5 tracking-tighter">Receso: ${s.breakMinutes}m</div>` : ''}
+                                return `<div onclick="event.stopPropagation(); openAssignModal(null, ${dIdx}, null, 0, '${fullDate}', ${worker.id}, '${s.id}')" 
+                                             class="text-[10px] p-2 rounded-lg border font-bold shadow-sm transition-transform active:scale-95 ${isAdmin ? 'cursor-pointer hover:border-blue-400' : ''} ${colorClass} ${s.highlighted ? 'highlight-cell' : ''}">
+                                        <div class="uppercase flex items-center gap-1 truncate tracking-tighter"><i data-lucide="${s.status === 'Trabajo' ? 'map-pin' : 'clock'}" class="w-3 h-3"></i> ${s.status === 'Trabajo' ? (st?st.name:'Tienda') : s.status}</div>
+                                        ${s.status === 'Trabajo' ? `<div class="text-blue-600 mt-1 leading-none font-black text-xs">${s.start}-${s.end}</div><div class="text-[8px] text-slate-400 mt-0.5 tracking-tighter">Receso: ${s.breakMinutes}m</div>` : ''}
                                     </div>`;
-                            }).join('') : `<div class="text-[10px] text-slate-200 text-center uppercase py-4 font-black opacity-30 tracking-widest">---</div>`}
+                            }).join('') : `<div onclick="openAssignModal(null, ${dIdx}, null, 0, '${fullDate}', ${worker.id})" class="text-[10px] text-slate-200 text-center uppercase py-4 font-black opacity-30 tracking-widest ${isAdmin ? 'cursor-pointer hover:bg-white/40 rounded' : ''}">---</div>`}
                         </div>
                     </td>`;
                 });
                 body.innerHTML += row + `</tr>`;
             });
+            lucide.createIcons();
         }
 
         function renderStoreGrids() {
@@ -888,7 +924,6 @@
             if(!container) return; container.innerHTML = '';
             const active = schedules[currentScheduleName];
             if(!active) return;
-
             active.stores.forEach(store => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm";
@@ -897,21 +932,21 @@
                     const sc = store.slots[type] || 0;
                     for (let i = 0; i < sc; i++) {
                         rows += `<tr class="border-b border-slate-100">
-                            <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center uppercase text-slate-400">${type} ${i+1}</td>
+                            <td class="p-3 bg-slate-50 border-r border-slate-200 text-[9px] font-black text-center uppercase text-slate-400 tracking-tighter">${type} ${i+1}</td>
                             ${DAYS.map((_, dIdx) => {
                                 const a = active.assignments.find(as => as.week === currentEditWeek && as.storeId == store.id && as.dayIdx === dIdx && as.type === type && as.slotIdx === i);
                                 const w = a ? active.workers.find(usr => usr.id == a.workerId) : null;
                                 let style = w ? `background: ${w.color}15; color: ${w.color}; border: 1.5px solid ${w.color}` : '';
                                 return `<td onclick="openAssignModal(${store.id}, ${dIdx}, '${type}', ${i})" class="p-2 border-r border-slate-200 ${isAdmin ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default'} h-14 transition-all">
-                                    <div class="w-full h-full flex items-center justify-center rounded-xl text-[10px] font-bold" style="${style}">${w ? w.name : '<span class="text-slate-200 italic">...</span>'}</div>
+                                    <div class="w-full h-full flex items-center justify-center rounded-xl text-[10px] font-bold" style="${style}">${w ? w.name : '<span class="text-slate-200 italic tracking-widest">...</span>'}</div>
                                 </td>`;
                             }).join('')}
                         </tr>`;
                     }
                 });
                 card.innerHTML = `<div class="bg-slate-800 text-white p-4 flex justify-between items-center"><div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i><span class="font-black uppercase text-sm">${store.name}</span><button onclick="editStoreName(${store.id})" class="admin-only ml-2 p-1 hover:text-emerald-400"><i data-lucide="edit-2" class="w-3 h-3"></i></button></div>
-                <div class="admin-only flex gap-2"><button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Aper</button><button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button><div class="w-px bg-slate-700 h-4 self-center mx-1"></div><button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold uppercase">+ Cier</button><button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button><button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
-                <div class="overflow-x-auto"><table class="w-full border-collapse min-w-[1200px]"><thead class="bg-slate-50"><tr><th class="p-3 border-r w-24 text-[10px] font-black uppercase text-slate-400 tracking-tighter">Turno</th>${DAYS.map(d=>`<th class="p-3 border-r text-[10px] font-black uppercase text-slate-500">${d}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+                <div class="admin-only flex gap-2"><button onclick="addSlot(${store.id},'Apertura')" class="bg-blue-600 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-tighter">+ Aper</button><button onclick="removeSlot(${store.id},'Apertura')" class="bg-blue-900 px-2 py-1 rounded text-[9px] font-bold">-</button><div class="w-px bg-slate-700 h-4 self-center mx-1"></div><button onclick="addSlot(${store.id},'Cierre')" class="bg-purple-600 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-tighter">+ Cier</button><button onclick="removeSlot(${store.id},'Cierre')" class="bg-purple-900 px-2 py-1 rounded text-[9px] font-bold">-</button><button onclick="deleteStore(${store.id})" class="ml-2 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>
+                <div class="overflow-x-auto"><table class="w-full border-collapse min-w-[1200px]"><thead class="bg-slate-50"><tr><th class="p-3 border-r w-24 text-[10px] font-black uppercase text-slate-400 tracking-tighter">Turno</th>${DAYS.map(d=>`<th class="p-3 border-r text-[10px] font-black uppercase text-slate-500 tracking-tighter">${d}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
                 container.appendChild(card);
             });
         }
@@ -927,7 +962,22 @@
             });
         }
 
-        // --- INICIO ---
+        async function checkAdminRegistration() {
+            try {
+                const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'admins', 'master'));
+                const authTitle = document.getElementById('authTitle');
+                const authSubmit = document.getElementById('authSubmitBtn');
+                if (adminDoc.exists()) {
+                    adminAccount = adminDoc.data();
+                    authTitle.innerText = "Panel Admin";
+                    authSubmit.innerText = "Entrar";
+                } else {
+                    authTitle.innerText = "Registrar Admin";
+                    authSubmit.innerText = "Crear Maestro";
+                }
+            } catch (e) { console.error(e); }
+        }
+
         window.addEventListener('load', async () => {
             initWeekSelector();
             try {
